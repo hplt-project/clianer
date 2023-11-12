@@ -23,6 +23,8 @@ class DatasetView(urwid.WidgetWrap):
             list_content.append(urwid.Divider("─"))  # this is the line character
 
         listbox = urwid.ListBox(list_content)
-        linebox = urwid.LineBox(listbox, title="/placeholder/path.en-ga.gz", title_attr="heading")
+        linebox = urwid.LineBox(
+            listbox, title="Dataset: /placeholder/path.en-ga.gz",
+            title_attr="heading", title_align="left")
 
         super().__init__(linebox)

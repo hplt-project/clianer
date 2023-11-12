@@ -25,10 +25,10 @@ def get_filters(location=FILTERS_LOCATION):
 
 
 class FilterItem(urwid.WidgetWrap):
-    def __init__(self, caption):
-        self.caption = caption
-        self.header = FilterItemHeader(caption, self.toggle_body)
-        self.body = FilterItemBody({"option": "value", "option2": "32"})
+    def __init__(self, filter_name, filter_options):
+        self.caption = filter_name
+        self.header = FilterItemHeader(filter_name, self.toggle_body)
+        self.body = FilterItemBody(filter_options)
 
         self.expanded = False
         self.collapsed_top = self.header
@@ -84,12 +84,19 @@ class FilterItemBody(urwid.WidgetWrap):
 
 
 class FilterList(urwid.WidgetWrap):
-    def __init__(self):
+    def __init__(self, filters=None):
+        self.listWalker = urwid.SimpleListWalker([])
+        self.top = urwid.LineBox(
+            urwid.ListBox(self.listWalker),
+            title="Filters", title_attr="heading", title_align="left")
 
-        filter_names = list(get_filters().keys())
-        filters_content = []
+        if filters is not None:
+            for filter_name, filter_options in filters:
+                self.add_filter(filter_name, filter_options)
+
+        super().__init__(self.top)
+
+    def add_filter(self, filter_name, filter_options):
+
         for filter_name in filter_names:
-            filters_content.append(FilterItem(filter_name))
-
-        top = urwid.ListBox(filters_content)
-        super().__init__(top)
+            self.listWalker.append(FilterItem(filter_name, filter_options))
