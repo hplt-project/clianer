@@ -52,7 +52,7 @@ class ClianerFrame(urwid.WidgetWrap):
     def openAddFilterDialog(self, height=30, width=40):
         assert self.dialog is None
         self.dialog = "add_filter"
-        widget = AddFilterDialog(self)
+        widget = AddFilterDialog()
 
         height = 30
         width = 40
@@ -66,7 +66,7 @@ class ClianerFrame(urwid.WidgetWrap):
             height=height)
         urwid.connect_signal(self._w[1], "close", self.addFilterDialogClosed)
 
-    def addFilterDialogClosed(self, widget, filter_name, filter_cfg):
+    def addFilterDialogClosed(self, widget, filter_spec):
         if self.dialog != "add_filter":
             raise Exception("Unexpected dialog")
         assert widget is not None
@@ -76,15 +76,14 @@ class ClianerFrame(urwid.WidgetWrap):
             self._w[1], "close", self.addFilterDialogClosed)
         self._w = self._w[0]
 
-        if filter_name is not None:
-            assert filter_cfg is not None
-            self.openEditFilterDialog(filter_name, filter_cfg)
+        if filter_spec is not None:
+            self.openEditFilterDialog(filter_spec)
 
-    def openEditFilterDialog(self, filter_name, filter_cfg):
+    def openEditFilterDialog(self, filter_spec):
         assert self.dialog is None
         self.dialog = "edit_filter"
 
-        widget = EditFilterDialog(self, filter_name, filter_cfg)
+        widget = EditFilterDialog(filter_spec)
         self._w = urwid.Overlay(
             widget,
             self._w,
@@ -95,15 +94,16 @@ class ClianerFrame(urwid.WidgetWrap):
 
         urwid.connect_signal(self._w[1], "close", self.editFilterDialogClosed)
 
-    def editFilterDialogClosed(self, widget, filter_name, filter_args):
+    def editFilterDialogClosed(self, widget, filter_spec, filter_args):
         if self.dialog != "edit_filter":
             raise Exception("Unexpected dialog")
         assert widget is not None
 
         self.dialog = None
-        urwid.disconnect_signal(self._w[1], "close", self.editFilterDialogClosed)
+        urwid.disconnect_signal(self._w[1], "close",
+                                self.editFilterDialogClosed)
         self._w = self._w[0]
 
         if filter_args is not None:
-            assert filter_name is not None
-            self.filterList.add_filter(filter_name, filter_args)
+            assert filter_spec is not None
+            self.filterList.add_filter(filter_spec.name, filter_args)

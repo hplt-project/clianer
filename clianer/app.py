@@ -6,7 +6,9 @@ import gzip
 
 from clianer.widgets.main_frame import ClianerFrame, PALETTE
 
+
 DATA_LOCATION = "/home/helcl/hplt/OpusCleaner/data/train-parts"
+
 
 def get_datasets(location):
     datasets = []
@@ -22,6 +24,7 @@ def get_datasets(location):
 
 
 class App:
+
     def __init__(self, args):
         self.args = args
         self.main_frame = ClianerFrame(args.file1, args.file2)
