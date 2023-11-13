@@ -1,27 +1,4 @@
-import os
-import json
 import urwid
-
-
-FILTERS_LOCATION = "/home/helcl/hplt/OpusCleaner/opuscleaner/filters/"
-
-def get_filters(location=FILTERS_LOCATION):
-    """Returns a list of filters from the given location and its subdirectories"""
-    filters = {}
-
-    for root, _, paths in os.walk(location):
-
-        for path in paths:
-            filename = os.path.join(root, path)
-            if path.endswith(".json"):
-                name = filename[len(location):].replace("/", ".").replace(".json", "")
-
-                # parse the json
-                with open(os.path.join(root, path), "r") as f:
-                    filter_cfg = json.load(f)
-                    filters[name] = filter_cfg
-
-    return filters
 
 
 class FilterItem(urwid.WidgetWrap):
@@ -45,7 +22,6 @@ class FilterItem(urwid.WidgetWrap):
             self._w = self.expanded_top
         else:
             self._w = self.collapsed_top
-
 
 
 class FilterItemHeader(urwid.Button):
@@ -97,6 +73,4 @@ class FilterList(urwid.WidgetWrap):
         super().__init__(self.top)
 
     def add_filter(self, filter_name, filter_options):
-
-        for filter_name in filter_names:
-            self.listWalker.append(FilterItem(filter_name, filter_options))
+        self.listWalker.append(FilterItem(filter_name, filter_options))
