@@ -31,14 +31,78 @@ class AddFilterDialog(urwid.WidgetWrap):
         self.available_filters = get_filters()
 
         self.buttons = []
-        for name in self.available_filters.keys():
-            self.buttons.append(urwid.Button(name, on_press=self.add_filter, user_data=name))
+        for filter_name in self.available_filters.keys():
+            self.buttons.append(urwid.Button(
+                filter_name, on_press=self.add_filter, user_data=filter_name))
 
         self.listbox = urwid.ListBox(urwid.SimpleFocusListWalker(self.buttons))
 
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(urwid.LineBox(self.listbox, title="New filter"))
 
-    def add_filter(self, button, name):
+    def add_filter(self, button, filter_name):
         # just close and return focus to parent
-        self._emit("close", name)
+        self._emit("close", filter_name, self.available_filters[filter_name])
+
+    def keypress(self, size, key):
+        if key == "esc":
+            self._emit("close", None, None)
+        else:
+            return super().keypress(size, key)
+
+
+class EditFilterDialog(urwid.WidgetWrap):
+
+    def __init__(self, parent, filter_name, filter_cfg):
+
+        self.filter_name = filter_name
+        description = "No filter description provided"
+        if "description" in filter_cfg:
+            description = filter_cfg["description"]
+        self.description_widget = urwid.Text(description)
+
+        self.filter_args = {}
+        if "parameters" in filter_cfg:
+            widget_list = []
+            for param_name in filter_cfg["parameters"]:
+                param = filter_cfg["parameters"][param_name]
+
+                # type, default, required, help
+                widget_list.append(urwid.Text(param_name, align="left"))
+
+                if "help" in param:
+                    widget_list.append(urwid.Text(param["help"], align="left"))
+
+                editor = urwid.Edit("", str(param["default"]), align="right")
+                self.filter_args[param_name] = editor
+
+                widget_list.append(editor)
+                widget_list.append(urwid.Divider())
+
+            self.parameters_widget = urwid.Pile(widget_list)
+        else:
+            self.parameters_widget = urwid.Text("No editable parameters")
+
+        urwid.register_signal(self.__class__, ["close"])
+        super().__init__(urwid.LineBox(urwid.ListBox([
+            self.description_widget,
+            urwid.Divider(),
+            self.parameters_widget,
+            urwid.Divider(),
+            urwid.Columns([urwid.Button("OK", on_press=self.save),
+                           urwid.Button("Cancel", on_press=self.cancel)])]), title=filter_name))
+
+    def keypress(self, size, key):
+        if key == "esc":
+            self.cancel(None)
+        if key == "enter":
+            self.save(None)
+        else:
+            return super().keypress(size, key)
+
+    def save(self, button):
+        self._emit("close", self.filter_name,
+                   {k: v.get_edit_text() for k, v in self.filter_args.items()})
+
+    def cancel(self, button):
+        self._emit("close", self.filter_name, None)

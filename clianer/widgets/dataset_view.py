@@ -25,6 +25,9 @@ class DatasetView(urwid.WidgetWrap):
         listbox = urwid.ListBox(list_content)
         linebox = urwid.LineBox(
             listbox, title="Dataset: /placeholder/path.en-ga.gz",
-            title_attr="heading", title_align="left")
+            title_align="left")
+
+        #linebox.title_widget = urwid.AttrMap(linebox.title_widget,
+        #                                     attr_map="heading", focus_map="focus heading")
 
         super().__init__(linebox)

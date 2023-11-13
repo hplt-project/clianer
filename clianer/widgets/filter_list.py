@@ -53,7 +53,8 @@ class FilterItemBody(urwid.WidgetWrap):
 
         cols = []
         for opt, val in filterOptions.items():
-            cols.append(urwid.Columns([urwid.Text(opt), urwid.Text(val)]))
+            cols.append(urwid.Pile([urwid.Text(opt, align="left"),
+                                    urwid.Text(val, align="right")]))
 
         self.top = urwid.Pile(cols)
         super().__init__(self.top)
