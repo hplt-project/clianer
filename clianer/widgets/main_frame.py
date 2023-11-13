@@ -3,6 +3,7 @@ import urwid
 from clianer.widgets.dataset_view import DatasetView
 from clianer.widgets.filter_list import FilterList
 from clianer.widgets.add_filter import AddFilterDialog, EditFilterDialog
+from clianer.data import ParallelDataset
 
 
 PALETTE = [(None,  "light gray", "black"),
@@ -23,7 +24,7 @@ class ClianerFrame(urwid.WidgetWrap):
     def __init__(self, f1, f2):
         self.dialog = None
         self.filterList = FilterList()
-        self.datasetView = DatasetView(f1, f2)
+        self.datasetView = DatasetView(ParallelDataset(f1, f2))
 
         self.body = urwid.Columns([(40, self.filterList), self.datasetView])
         self.header = urwid.Text("File")
