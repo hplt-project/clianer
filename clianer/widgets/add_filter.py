@@ -1,7 +1,7 @@
 import urwid
 
-from clianer.oc_filters import (get_global_filters, FilterParameter,
-                                FilterParameterTuple, FilterParameterList)
+from clianer.filters import (get_global_filters, FilterParameter,
+                             FilterParameterTuple, FilterParameterList)
 
 class AddFilterDialog(urwid.WidgetWrap):
     """Dialog overlay that lets user choose which filter to add"""
