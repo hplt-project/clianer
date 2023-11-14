@@ -1,15 +1,16 @@
 import urwid
 
-from clianer.filters import FilterConfig, ParameterGroup, Parameter
+from clianer.oc_filters import (get_global_filters, FilterParameter,
+                                FilterParameterTuple, FilterParameterList)
 
 class AddFilterDialog(urwid.WidgetWrap):
     """Dialog overlay that lets user choose which filter to add"""
 
     def __init__(self):
-        self.available_filters = FilterConfig.get_filters()
+        self.available_filters = get_global_filters()
 
         self.buttons = []
-        for filter_spec in self.available_filters:
+        for name, filter_spec in self.available_filters.items():
             self.buttons.append(
                 urwid.Button(filter_spec.name, on_press=self.add_filter,
                              user_data=filter_spec))
@@ -43,8 +44,8 @@ class EditFilterDialog(urwid.WidgetWrap):
         self.filter_args = {}
         self.parameter_widget_list = []
         if filter_spec.parameters:
-            for param in filter_spec.parameters:
-                self._add_parameter_widgets(param)
+            for name, param in filter_spec.parameters.items():
+                self._add_parameter_widgets(name, param)
 
         if self.parameter_widget_list:
             self.parameters_widget = urwid.Pile(self.parameter_widget_list)
@@ -65,20 +66,24 @@ class EditFilterDialog(urwid.WidgetWrap):
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(self.top)
 
-    def _add_parameter_widgets(self, param: Parameter):
-        self.parameter_widget_list.append(urwid.Text(param.name, align="left"))
-        if param.helpstr:
+    def _add_parameter_widgets(self, name: str, param: FilterParameter):
+        self.parameter_widget_list.append(urwid.Text(name, align="left"))
+        if param.help:
             self.parameter_widget_list.append(
-                urwid.Text(param.helpstr, align="left"))
+                urwid.Text(param.help, align="left"))
 
-        if isinstance(param, ParameterGroup):
+        if isinstance(param, FilterParameterTuple):
             for subparam in param.parameters:
                 self._add_parameter_widgets(subparam)
-            return
+
+        if isinstance(param, FilterParameterList):
+            # TODO add button to add new items to list
+            for subparam in param.parameters:
+                self._add_parameter_widgets(subparam)
 
         # TODO handle different types of parameters
         editor = urwid.Edit("", str(param.default), align="right")
-        self.filter_args[param.name] = editor
+        self.filter_args[name] = editor
 
         self.parameter_widget_list.append(editor)
         self.parameter_widget_list.append(urwid.Divider())

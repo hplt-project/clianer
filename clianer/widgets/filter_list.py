@@ -49,10 +49,10 @@ class FilterItemHeader(urwid.Button):
 
 
 class FilterItemBody(urwid.WidgetWrap):
-    def __init__(self, filterOptions):
+    def __init__(self, filter_params):
 
         cols = []
-        for opt, val in filterOptions.items():
+        for opt, val in filter_params.items():
             cols.append(urwid.Pile([urwid.Text(opt, align="left"),
                                     urwid.Text(val, align="right")]))
 
