@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
 
-import argparse
 import urwid
 import gzip
 import os
 import sys
 
-from clianer.widgets.main_frame import ClianerFrame, PALETTE
+from clianer.widgets.main_frame import ClianerFrame
 from opuscleaner.filters import set_global_filters, list_filters
 
+
+PALETTE = [(None,  "light gray", "black"),
+           ("heading", "white", "black"),
+           ("line", "light gray", "black"),
+           ("options", "light cyan", "black"),
+           ("focus heading", "white", "dark red"),
+           ("focus line", "white", "black"),
+           ("focus options", "black", "light gray"),
+           ("selected", "white", "dark blue")]
 
 DATA_LOCATION = "/home/helcl/hplt/OpusCleaner/data/train-parts"
 

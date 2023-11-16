@@ -6,15 +6,6 @@ from clianer.widgets.add_filter import AddFilterDialog, EditFilterDialog
 from clianer.data import ParallelDataset
 
 
-PALETTE = [(None,  "light gray", "black"),
-           ("heading", "white", "black"),
-           ("line", "light gray", "black"),
-           ("options", "light cyan", "black"),
-           ("focus heading", "white", "dark red"),
-           ("focus line", "white", "black"),
-           ("focus options", "black", "light gray"),
-           ("selected", "white", "dark blue")]
-
 # FOCUS_MAP = {"heading": "focus heading",
 #              "options": "focus options",
 #              "line": "focus line"}
