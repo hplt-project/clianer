@@ -7,7 +7,7 @@ import os
 import sys
 
 from clianer.widgets.main_frame import ClianerFrame, PALETTE
-from clianer.filters import set_global_filters, list_filters
+from opuscleaner.filters import set_global_filters, list_filters
 
 
 DATA_LOCATION = "/home/helcl/hplt/OpusCleaner/data/train-parts"
