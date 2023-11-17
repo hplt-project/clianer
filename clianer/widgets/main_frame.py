@@ -18,7 +18,7 @@ class ClianerFrame(urwid.WidgetWrap):
         self.datasetView = DatasetView(ParallelDataset(f1, f2))
 
         self.body = urwid.Columns([(40, self.filterList), self.datasetView])
-        self.header = urwid.Text("File")
+        self.header = urwid.AttrMap(urwid.Text("  File"), "options")
 
         self.footer = urwid.Columns([
             urwid.AttrMap(urwid.Text("F3: Add Filter"), "options"),

@@ -37,7 +37,6 @@ class FilterItemHeader(urwid.Button):
         urwid.connect_signal(self, "click", self.on_toggle_click)
 
     def on_toggle_click(self, *args):
-        self.icon.set_text("aaa")
         if self.callback:
             self.callback()
 

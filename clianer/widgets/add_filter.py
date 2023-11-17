@@ -1,9 +1,11 @@
 import urwid
 
+from clianer.widgets.button import CustomButton
+from clianer.widgets.dialog import Dialog
 from opuscleaner.filters import (get_global_filters, FilterParameter,
                                  FilterParameterTuple, FilterParameterList)
 
-class AddFilterDialog(urwid.WidgetWrap):
+class AddFilterDialog(Dialog):
     """Dialog overlay that lets user choose which filter to add"""
 
     def __init__(self):
@@ -12,14 +14,14 @@ class AddFilterDialog(urwid.WidgetWrap):
         self.buttons = []
         for name, filter_spec in self.available_filters.items():
             self.buttons.append(
-                urwid.Button(filter_spec.name, on_press=self.add_filter,
+                CustomButton(filter_spec.name, on_press=self.add_filter,
                              user_data=filter_spec))
 
         self.listbox = urwid.ListBox(urwid.SimpleFocusListWalker(self.buttons))
-        self.top = urwid.LineBox(self.listbox, title="New filter")
+        #self.top = urwid.LineBox(self.listbox, title="New filter")
 
         urwid.register_signal(self.__class__, ["close"])
-        super().__init__(self.top)
+        super().__init__(self.listbox, "New filter")
 
     def add_filter(self, button, filter_obj):
         self._emit("close", filter_obj)
@@ -31,7 +33,7 @@ class AddFilterDialog(urwid.WidgetWrap):
             return super().keypress(size, key)
 
 
-class EditFilterDialog(urwid.WidgetWrap):
+class EditFilterDialog(Dialog):
 
     def __init__(self, filter_spec):
         self.filter_spec = filter_spec
@@ -52,19 +54,20 @@ class EditFilterDialog(urwid.WidgetWrap):
         else:
             self.parameters_widget = urwid.Text("No editable parameters")
 
-        self.top = urwid.LineBox(
-            urwid.ListBox([
+        self.cancel_button = CustomButton("Cancel", on_press=self.cancel, align="center")
+        self.ok_button = CustomButton("OK", on_press=self.save, align="center")
+        self.buttons = urwid.Padding(
+            urwid.Columns([self.ok_button, self.cancel_button], 4), "center")
+
+        self.top = urwid.ListBox([
                 self.description_widget,
                 urwid.Divider(),
                 self.parameters_widget,
                 urwid.Divider(),
-                urwid.Columns([
-                    urwid.Button("OK", on_press=self.save),
-                    urwid.Button("Cancel", on_press=self.cancel)])]),
-            title=self.filter_spec.name)
+                self.buttons])
 
         urwid.register_signal(self.__class__, ["close"])
-        super().__init__(self.top)
+        super().__init__(self.top, self.filter_spec.name)
 
     def _add_parameter_widgets(self, name: str, param: FilterParameter):
         self.parameter_widget_list.append(urwid.Text(name, align="left"))
@@ -84,6 +87,7 @@ class EditFilterDialog(urwid.WidgetWrap):
         # TODO handle different types of parameters
         editor = urwid.Edit("", str(param.default), align="right")
         self.filter_args[name] = editor
+        editor = urwid.AttrMap(editor, "edit")
 
         self.parameter_widget_list.append(editor)
         self.parameter_widget_list.append(urwid.Divider())
@@ -92,7 +96,12 @@ class EditFilterDialog(urwid.WidgetWrap):
         if key == "esc":
             self.cancel(None)
         if key == "enter":
-            self.save(None)
+            # unless focus is on a button, save
+            focus = self.top.get_focus_widgets()[-1]
+            if focus == self.cancel_button:
+                self.cancel(None)
+            else:
+                self.save(None)
         else:
             return super().keypress(size, key)
 

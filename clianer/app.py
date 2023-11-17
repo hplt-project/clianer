@@ -9,14 +9,24 @@ from clianer.widgets.main_frame import ClianerFrame
 from opuscleaner.filters import set_global_filters, list_filters
 
 
-PALETTE = [(None,  "light gray", "black"),
-           ("heading", "white", "black"),
-           ("line", "light gray", "black"),
-           ("options", "light cyan", "black"),
+PALETTE = [(None,  "light gray", "dark blue"),
+           ("heading", "white", "dark blue"),
+           ("line", "light gray", "dark blue"),
+           ("options", "black", "dark cyan"),
            ("focus heading", "white", "dark red"),
-           ("focus line", "white", "black"),
+           ("focus line", "white", "dark blue"),
            ("focus options", "black", "light gray"),
-           ("selected", "white", "dark blue")]
+           ("selected", "white", "dark blue"),
+           ("shadow", "white", "black"),
+           ("border", "black", "dark blue"),
+           ("dialog heading", "dark blue", "light gray"),
+           ("dialog body", "black", "light gray"),
+           ("button normal", "black", "light gray"),
+           ("button select", "black", "dark cyan"),
+           ("edit", "black", "dark cyan")
+           ]
+
+
 
 DATA_LOCATION = "/home/helcl/hplt/OpusCleaner/data/train-parts"
 
