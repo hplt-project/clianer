@@ -21,7 +21,7 @@ class AddFilterDialog(Dialog):
         #self.top = urwid.LineBox(self.listbox, title="New filter")
 
         urwid.register_signal(self.__class__, ["close"])
-        super().__init__(self.listbox, "New filter")
+        super().__init__(self.listbox, "New filter", width=50, height=35)
 
     def add_filter(self, button, filter_obj):
         self._emit("close", filter_obj)
@@ -67,7 +67,7 @@ class EditFilterDialog(Dialog):
                 self.buttons])
 
         urwid.register_signal(self.__class__, ["close"])
-        super().__init__(self.top, self.filter_spec.name)
+        super().__init__(self.top, self.filter_spec.name, width=60, height=40)
 
     def _add_parameter_widgets(self, name: str, param: FilterParameter):
         self.parameter_widget_list.append(urwid.Text(name, align="left"))
@@ -87,7 +87,7 @@ class EditFilterDialog(Dialog):
         # TODO handle different types of parameters
         editor = urwid.Edit("", str(param.default), align="right")
         self.filter_args[name] = editor
-        editor = urwid.AttrMap(editor, "edit")
+        editor = urwid.AttrMap(editor, "dialog edit")
 
         self.parameter_widget_list.append(editor)
         self.parameter_widget_list.append(urwid.Divider())

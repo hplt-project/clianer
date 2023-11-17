@@ -6,11 +6,6 @@ from clianer.widgets.add_filter import AddFilterDialog, EditFilterDialog
 from clianer.data import ParallelDataset
 
 
-# FOCUS_MAP = {"heading": "focus heading",
-#              "options": "focus options",
-#              "line": "focus line"}
-
-
 class ClianerFrame(urwid.WidgetWrap):
     def __init__(self, f1, f2):
         self.dialog = None
@@ -39,63 +34,41 @@ class ClianerFrame(urwid.WidgetWrap):
             if self.dialog is None:
                 self.openAddFilterDialog()
 
+        # if key == "f2":
+        #     if self.dialog is None:
+        #         self.openSelectDatasetDialog()
+
         return super().keypress(size, key)
 
-    def openAddFilterDialog(self, height=30, width=40):
+    def openDialog(self, widget, tag, callback, user_args=None):
         assert self.dialog is None
-        self.dialog = "add_filter"
+        self.dialog = tag
+        self._w = widget.overlay(self._w)
+
+        def callback_wrapper(widget, *args, **kwargs):
+            assert widget is not None
+            self.dialog = None
+            urwid.disconnect_signal(
+                self._w[1], "close", callback_wrapper)
+            self._w = self._w[0]
+            callback(widget, *args, **kwargs)
+
+        urwid.connect_signal(
+            self._w[1], "close", callback_wrapper)
+
+    def openAddFilterDialog(self):
         widget = AddFilterDialog()
+        self.openDialog(widget, "add_filter", self.addFilterDialogClosed)
 
-        height = 30
-        width = 40
-
-        self._w = urwid.Overlay(
-            widget,
-            self._w,
-            align="center",
-            width=width,
-            valign="middle",
-            height=height)
-        urwid.connect_signal(self._w[1], "close", self.addFilterDialogClosed)
+    def openEditFilterDialog(self, filter_spec):
+        widget = EditFilterDialog(filter_spec)
+        self.openDialog(widget, "edit_filter", self.editFilterDialogClosed)
 
     def addFilterDialogClosed(self, widget, filter_spec):
-        if self.dialog != "add_filter":
-            raise Exception("Unexpected dialog")
-        assert widget is not None
-
-        self.dialog = None
-        urwid.disconnect_signal(
-            self._w[1], "close", self.addFilterDialogClosed)
-        self._w = self._w[0]
-
         if filter_spec is not None:
             self.openEditFilterDialog(filter_spec)
 
-    def openEditFilterDialog(self, filter_spec):
-        assert self.dialog is None
-        self.dialog = "edit_filter"
-
-        widget = EditFilterDialog(filter_spec)
-        self._w = urwid.Overlay(
-            widget,
-            self._w,
-            align="center",
-            width=80,
-            valign="middle",
-            height=40)
-
-        urwid.connect_signal(self._w[1], "close", self.editFilterDialogClosed)
-
     def editFilterDialogClosed(self, widget, filter_spec, filter_args):
-        if self.dialog != "edit_filter":
-            raise Exception("Unexpected dialog")
-        assert widget is not None
-
-        self.dialog = None
-        urwid.disconnect_signal(self._w[1], "close",
-                                self.editFilterDialogClosed)
-        self._w = self._w[0]
-
         if filter_args is not None:
             assert filter_spec is not None
             self.filterList.add_filter(filter_spec.name, filter_args)

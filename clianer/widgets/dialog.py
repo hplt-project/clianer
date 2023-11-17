@@ -32,9 +32,9 @@ class Dialog(urwid.WidgetWrap):
 
         # "shadow" effect
         w = urwid.Columns([w, ("fixed", 2, urwid.AttrMap(urwid.Filler(
-            urwid.Text(("border", "  ")), "top"), "shadow"))])
+            urwid.Text(("dialog shadow corner", "  ")), "top"), "shadow"))])
         w = urwid.Frame(w, footer=urwid.AttrMap(
-            urwid.Text(("border", "  ")), "shadow"))
+            urwid.Text(("dialog shadow corner", "  ")), "shadow"))
 
         # outermost border area
         w = urwid.Padding(w, "center", self.width)
@@ -44,3 +44,7 @@ class Dialog(urwid.WidgetWrap):
         self.dialog_top = w
 
         super().__init__(self.dialog_top)
+
+    def overlay(self, bottom_w):
+        return urwid.Overlay(
+            self, bottom_w, "center", self.width, "middle", self.height)
