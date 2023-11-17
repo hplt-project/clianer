@@ -23,7 +23,9 @@ PALETTE = [(None,  "light gray", "dark blue"),
            ("dialog body", "black", "light gray"),
            ("button normal", "black", "light gray"),
            ("button select", "black", "dark cyan"),
-           ("edit", "black", "dark cyan")
+           ("edit", "black", "dark cyan"),
+           ("data", "black", "light gray"),
+           ("focus data", "black", "dark cyan"),
            ]
 
 

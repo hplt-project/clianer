@@ -7,6 +7,7 @@ class Dialog(urwid.WidgetWrap):
     def __init__(self, body, header, width=None, height=None):
         # inspired by urwid's dialog.py
 
+        # TODO the widht and height attributes do not work as expected
         self.width = width
         if self.width is None:
             self.width = ("relative", 80)
