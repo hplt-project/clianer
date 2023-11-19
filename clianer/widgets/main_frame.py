@@ -1,4 +1,9 @@
+import asyncio
 import urwid
+
+from opuscleaner.server import get_sample
+from opuscleaner.datasets import list_datasets
+from opuscleaner.server import ParsedFilterOutput
 
 from clianer.widgets.dataset_view import DatasetView
 from clianer.widgets.filter_list import FilterList
@@ -9,11 +14,12 @@ from clianer.widgets.select_dataset import SelectDatasetDialog
 class ClianerFrame(urwid.WidgetWrap):
     def __init__(self):
         self.dialog = None
-        self.filterList = FilterList()
-        self.datasetView = DatasetView(self.filterList.get_filters)
+        self.filter_list = FilterList()
+        self.dataset = None
+        self.datasetView = DatasetView()
         self.langs = ["en", "ga"]
 
-        self.body = urwid.Columns([(40, self.filterList), self.datasetView])
+        self.body = urwid.Columns([(40, self.filter_list), self.datasetView])
         self.header = urwid.AttrMap(urwid.Text("  File"), "options")
 
         self.footer = urwid.Columns([
@@ -40,20 +46,7 @@ class ClianerFrame(urwid.WidgetWrap):
                self.openSelectDatasetDialog()
 
         if key == "f4":
-            from opuscleaner.server import get_sample
-            from opuscleaner.datasets import list_datasets
-            from opuscleaner.server import ParsedFilterOutput
-
-            filters = list(self.filterList.get_filters())
-            name = "ELRC-3456-EC_EUROPA_covid-v1.en-ga"
-            s = get_sample(name, filters)
-
-            async def get_():
-                return [ParsedFilterOutput(output) async for output in s]
-
-            import asyncio
-            ss = asyncio.run(get_())
-            import pudb;pu.db
+            pass
 
         return super().keypress(size, key)
 
@@ -98,12 +91,25 @@ class ClianerFrame(urwid.WidgetWrap):
                 lang = self.langs[0]
             if filter_lang_is_src is False:
                 lang = self.langs[1]
-            self.filterList.add_filter(filter_spec, filter_args, lang)
+            self.filter_list.add_filter(filter_spec, filter_args, lang)
+            self.update_data()
 
     def selectDatasetDialogClosed(self, widget, dataset_name):
         if dataset_name is not None:
             # TODO ask to save filters
-
             # reset filters
-            self.filterList.clear_filters()
-            self.datasetView.open_dataset(dataset_name)
+            self.filter_list.clear_filters()
+            self.open_dataset(dataset_name)
+
+    def open_dataset(self, name):
+        self.dataset = name
+        self.update_data()
+
+    def update_data(self):
+        self.loaded_data = asyncio.run(self.load_data())
+        self.datasetView.show(self.loaded_data[-1].stdout, title=self.dataset)
+
+    async def load_data(self):
+        filters = list(self.filter_list.get_filters())
+        sample = get_sample(self.dataset, filters)
+        return [ParsedFilterOutput(f) async for f in sample]
