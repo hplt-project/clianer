@@ -46,7 +46,13 @@ class ClianerFrame(urwid.WidgetWrap):
                self.openSelectDatasetDialog()
 
         if key == "f4":
-            pass
+            self.show_diff(0, -1)
+
+        if key == "f5":
+            self.show_orig()
+
+        if key == "f6":
+            self.show_clean()
 
         return super().keypress(size, key)
 
@@ -104,6 +110,29 @@ class ClianerFrame(urwid.WidgetWrap):
     def open_dataset(self, name):
         self.dataset = name
         self.update_data()
+
+    def show_orig(self):
+        self.datasetView.show(self.loaded_data[0].stdout, title=self.dataset)
+
+    def show_clean(self):
+        self.datasetView.show(self.loaded_data[-1].stdout, title=self.dataset)
+
+    def show_diff(self, rev1, rev2):
+        #assert rev1 < rev2
+        #assert rev1 >= 0
+        assert rev1 < len(self.loaded_data)
+        assert rev2 < len(self.loaded_data)
+
+        rev1_data = self.loaded_data[rev1].stdout
+        rev2_data = self.loaded_data[rev2].stdout
+
+        rev1_src = [item[self.langs[0]] for item in rev1_data]
+        rev1_tgt = [item[self.langs[1]] for item in rev1_data]
+        rev2_src = [item[self.langs[0]] for item in rev2_data]
+        rev2_tgt = [item[self.langs[1]] for item in rev2_data]
+
+        self.datasetView.show_diff(
+            rev1_src, rev1_tgt, rev2_src, rev2_tgt, title=self.dataset)
 
     def update_data(self):
         self.loaded_data = asyncio.run(self.load_data())

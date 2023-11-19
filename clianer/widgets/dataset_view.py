@@ -1,5 +1,7 @@
 import urwid
 
+from clianer.diff import compute_diff
+
 
 class DatasetView(urwid.WidgetWrap):
 
@@ -38,3 +40,21 @@ class DatasetView(urwid.WidgetWrap):
 
         if title is not None:
             self.linebox.set_title(f"Dataset: {title}")
+
+
+    def show_diff(self, rev1_src, rev1_tgt, rev2_src, rev2tgt, title=None):
+
+        srcdiff = compute_diff(rev1_src, rev2_src)
+        tgtdiff = compute_diff(rev1_tgt, rev2tgt)
+
+        assert len(srcdiff) == len(tgtdiff)
+
+        # note that left and right are already urwid texts.
+        self.datacols.body.clear()
+        for left, right in zip(srcdiff, tgtdiff):
+            cols = urwid.Columns([left, right], dividechars=1)
+            cols._selectable = True
+            self.datacols.body.append(
+                urwid.AttrMap(cols, attr_map="data", focus_map="focus data"))
+            if self.draw_lines:
+                self.datacols.body.append(urwid.Divider("─"))
