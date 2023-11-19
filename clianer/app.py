@@ -57,7 +57,7 @@ class App:
 
     def __init__(self, args):
         self.args = args
-        self.main_frame = ClianerFrame(args.file1, args.file2)
+        self.main_frame = ClianerFrame()
 
         set_global_filters(list_filters(FILTER_PATHS))
 

@@ -8,6 +8,7 @@ from opuscleaner.filters import (get_global_filters, FilterParameter,
                                  FilterParameterTuple, FilterParameterList,
                                  FilterType)
 
+
 class AddFilterDialog(Dialog):
     """Dialog overlay that lets user choose which filter to add"""
 
@@ -28,12 +29,6 @@ class AddFilterDialog(Dialog):
 
     def add_filter(self, button, filter_obj):
         self._emit("close", filter_obj)
-
-    def keypress(self, size, key):
-        if key == "esc":
-            self._emit("close", None)
-        else:
-            return super().keypress(size, key)
 
 
 class EditFilterDialog(Dialog):

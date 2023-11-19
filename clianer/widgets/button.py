@@ -9,7 +9,7 @@ class CustomButton(urwid.Button):
         self.button_right = urwid.Text(' ')
 
         super().__init__(label, on_press, user_data, **kwargs)
-        #import pudb;pu.db
+
         self._w = urwid.Columns([
             ('fixed', 1, self.button_left),
             self._label,

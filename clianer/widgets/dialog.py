@@ -48,3 +48,9 @@ class Dialog(urwid.WidgetWrap):
     def overlay(self, bottom_w):
         return urwid.Overlay(
             self, bottom_w, "center", self.width, "middle", self.height)
+
+    def keypress(self, size, key):
+        if key == "esc":
+            self._emit("close", None)
+        else:
+            return super().keypress(size, key)

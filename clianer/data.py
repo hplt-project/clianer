@@ -10,17 +10,20 @@ N_TAIL = 5
 
 class ParallelDataset:
 
-    def __init__(self, src_path, tgt_path):
+    def __init__(self, src_path, tgt_path, name=None):
         self.src_path = src_path
         self.tgt_path = tgt_path
 
+        self.name = name
+        if self.name is None:
+            src_name = src_path.split('/')[-1].split('.')[0]
+            tgt_name = tgt_path.split('/')[-1].split('.')[0]
 
-        src_name = src_path.split('/')[-1].split('.')[0]
-        tgt_name = tgt_path.split('/')[-1].split('.')[0]
-        if src_name == tgt_name:
-            self.name = src_name
-        else:
-            self.name = src_path.split('/')[-1] + '_' + tgt_path.split('/')[-1]
+            if src_name == tgt_name:
+                self.name = src_name
+            else:
+                self.name = str(src_path).split('/')[-1] \
+                    + '_' + str(tgt_path).split('/')[-1]
 
         self.sample = None
 
