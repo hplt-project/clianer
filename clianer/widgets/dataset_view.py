@@ -26,3 +26,8 @@ class DatasetView(urwid.WidgetWrap):
         #                                     attr_map="heading", focus_map="focus heading")
 
         super().__init__(linebox)
+
+
+
+    def display_sample(self, sample):
+        pass

@@ -1,9 +1,12 @@
+from typing import Any, Dict
+
 import urwid
 
 from clianer.widgets.button import CustomButton
 from clianer.widgets.dialog import Dialog
 from opuscleaner.filters import (get_global_filters, FilterParameter,
-                                 FilterParameterTuple, FilterParameterList)
+                                 FilterParameterTuple, FilterParameterList,
+                                 FilterType)
 
 class AddFilterDialog(Dialog):
     """Dialog overlay that lets user choose which filter to add"""
@@ -43,7 +46,21 @@ class EditFilterDialog(Dialog):
             description = filter_spec.description
         self.description_widget = urwid.Text(description)
 
-        self.filter_args = {}
+        self.filter_args: Dict[str, Any] = {}
+
+        self.mono_lang_selector = []
+        self.filter_type_widget_list = []
+        if filter_spec.type == FilterType.MONOLINGUAL:
+            self.filter_type_widget_list.append(urwid.Text("Language for monolingual filter:"))
+            self.mono_lang_selector = []
+            urwid.RadioButton(self.mono_lang_selector, "Source")
+            urwid.RadioButton(self.mono_lang_selector, "Target")
+            self.filter_type_widget_list.append(urwid.Columns(self.mono_lang_selector))
+        if self.filter_type_widget_list:
+            self.filter_type_widget = urwid.Pile(self.filter_type_widget_list)
+        else:
+            self.filter_type_widget = urwid.Text("Bilingual filter")
+
         self.parameter_widget_list = []
         if filter_spec.parameters:
             for name, param in filter_spec.parameters.items():
@@ -60,11 +77,13 @@ class EditFilterDialog(Dialog):
             urwid.Columns([self.ok_button, self.cancel_button], 4), "center")
 
         self.top = urwid.ListBox([
-                self.description_widget,
-                urwid.Divider(),
-                self.parameters_widget,
-                urwid.Divider(),
-                self.buttons])
+            self.description_widget,
+            urwid.Divider(),
+            self.filter_type_widget,
+            urwid.Divider(),
+            self.parameters_widget,
+            urwid.Divider(),
+            self.buttons])
 
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(self.top, self.filter_spec.name, width=60, height=40)
@@ -107,7 +126,8 @@ class EditFilterDialog(Dialog):
 
     def save(self, button):
         self._emit("close", self.filter_spec,
-                   {k: v.get_edit_text() for k, v in self.filter_args.items()})
+                   {k: v.get_edit_text() for k, v in self.filter_args.items()},
+                   self.mono_lang_selector[0].state if self.mono_lang_selector else None)
 
     def cancel(self, button):
         self._emit("close", self.filter_spec, None)

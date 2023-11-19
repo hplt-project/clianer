@@ -1,11 +1,14 @@
+from typing import List
 import urwid
+
+from opuscleaner.filters import FilterStep, FilterType
 
 
 class FilterItem(urwid.WidgetWrap):
-    def __init__(self, filter_name, filter_options):
-        self.caption = filter_name
-        self.header = FilterItemHeader(filter_name, self.toggle_body)
-        self.body = FilterItemBody(filter_options)
+    def __init__(self, filter_spec, filter_args, filter_lang=None):
+        self.caption = filter_spec.name
+        self.header = FilterItemHeader(filter_spec.name, self.toggle_body)
+        self.body = FilterItemBody(filter_args, filter_lang)
 
         self.expanded = False
         self.collapsed_top = self.header
@@ -48,9 +51,13 @@ class FilterItemHeader(urwid.Button):
 
 
 class FilterItemBody(urwid.WidgetWrap):
-    def __init__(self, filter_params):
+    def __init__(self, filter_params, mono_lang=None):
 
         cols = []
+        if mono_lang is not None:
+            cols.append(urwid.Text("Language: " + mono_lang, align="left"))
+            cols.append(urwid.Divider())
+
         for opt, val in filter_params.items():
             cols.append(urwid.Pile([urwid.Text(opt, align="left"),
                                     urwid.Text(val, align="right")]))
@@ -66,11 +73,23 @@ class FilterList(urwid.WidgetWrap):
             urwid.ListBox(self.listWalker),
             title="Filters", title_attr="heading", title_align="left")
 
+        self.filters = []
         if filters is not None:
-            for filter_name, filter_options in filters:
-                self.add_filter(filter_name, filter_options)
+            for filter_step in filters:
+                self.add_filter(filter_step)
 
         super().__init__(self.top)
 
-    def add_filter(self, filter_name, filter_options):
-        self.listWalker.append(FilterItem(filter_name, filter_options))
+    def add_filter(self, filter_spec, filter_args, filter_lang):
+        self.filters.append((filter_spec, filter_args, filter_lang))
+        self.listWalker.append(
+            FilterItem(filter_spec, filter_args, filter_lang))
+
+    def get_filters(self):
+        for (filter_spec, filter_args, filter_lang) in self.filters:
+            if filter_spec.type == FilterType.MONOLINGUAL:
+                yield FilterStep(filter=filter_spec.name,
+                                 parameters=filter_args, language=filter_lang)
+            else:
+                yield FilterStep(filter=filter_spec.name,
+                                 parameters=filter_args)
