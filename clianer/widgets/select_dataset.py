@@ -21,7 +21,7 @@ class SelectDatasetDialog(Dialog):
             button = CustomButton(
                 f"{dataset_name} ({langs})",
                 on_press=self.select_dataset,
-                user_data=(dataset_name, self.datasets[dataset_name]))
+                user_data=dataset_name)
             self.dataset_widgets.append(button)
 
         self.listbox = urwid.ListBox(
@@ -30,5 +30,5 @@ class SelectDatasetDialog(Dialog):
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(self.listbox, "Select dataset", width=60, height=30)
 
-    def select_dataset(self, button, dataset_cfg):
-        self._emit("close", dataset_cfg)
+    def select_dataset(self, button, dataset):
+        self._emit("close", dataset)

@@ -93,3 +93,7 @@ class FilterList(urwid.WidgetWrap):
             else:
                 yield FilterStep(filter=filter_spec.name,
                                  parameters=filter_args)
+
+    def clear_filters(self):
+        self.filters = []
+        self.listWalker.clear()

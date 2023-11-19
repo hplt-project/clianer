@@ -4,14 +4,13 @@ from clianer.widgets.dataset_view import DatasetView
 from clianer.widgets.filter_list import FilterList
 from clianer.widgets.add_filter import AddFilterDialog, EditFilterDialog
 from clianer.widgets.select_dataset import SelectDatasetDialog
-from clianer.data import ParallelDataset
 
 
 class ClianerFrame(urwid.WidgetWrap):
     def __init__(self):
         self.dialog = None
         self.filterList = FilterList()
-        self.datasetView = DatasetView()
+        self.datasetView = DatasetView(self.filterList.get_filters)
         self.langs = ["en", "ga"]
 
         self.body = urwid.Columns([(40, self.filterList), self.datasetView])
@@ -40,19 +39,21 @@ class ClianerFrame(urwid.WidgetWrap):
             if self.dialog is None:
                self.openSelectDatasetDialog()
 
-            # from opuscleaner.server import get_sample
-            # from opuscleaner.datasets import list_datasets
+        if key == "f4":
+            from opuscleaner.server import get_sample
+            from opuscleaner.datasets import list_datasets
+            from opuscleaner.server import ParsedFilterOutput
 
-            # filters = list(self.filterList.get_filters())
-            # name = "ELRC-3456-EC_EUROPA_covid-v1.en-ga"
-            # s = get_sample(name, filters)
+            filters = list(self.filterList.get_filters())
+            name = "ELRC-3456-EC_EUROPA_covid-v1.en-ga"
+            s = get_sample(name, filters)
 
-            # async def get_():
-            #     return [output async for output in s]
+            async def get_():
+                return [ParsedFilterOutput(output) async for output in s]
 
-            # import asyncio
-            # ss = asyncio.run(get_())
-
+            import asyncio
+            ss = asyncio.run(get_())
+            import pudb;pu.db
 
         return super().keypress(size, key)
 
@@ -99,15 +100,10 @@ class ClianerFrame(urwid.WidgetWrap):
                 lang = self.langs[1]
             self.filterList.add_filter(filter_spec, filter_args, lang)
 
-    def selectDatasetDialogClosed(self, widget, dataset_cfg):
-        # datasets: Dict[str, List[Tuple[str, Path]]]
-        # {name -> [(lang, path)]}
+    def selectDatasetDialogClosed(self, widget, dataset_name):
+        if dataset_name is not None:
+            # TODO ask to save filters
 
-        if dataset_cfg is not None:
-            # TODO handle also monolingual datasets (and more than 2 langs)
-            assert len(dataset_cfg[1]) == 2
-
-            (p_src, p_tgt) = dataset_cfg[1][0][1], dataset_cfg[1][1][1]
-
-            self.datasetView.set_dataset(ParallelDataset(p_src, p_tgt, dataset_cfg[0]))
-            self.langs = [dataset_cfg[1][0][0], dataset_cfg[1][1][0]]
+            # reset filters
+            self.filterList.clear_filters()
+            self.datasetView.open_dataset(dataset_name)
