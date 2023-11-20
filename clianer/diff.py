@@ -56,8 +56,19 @@ def process_hunk(hunk: Hunk) -> List[Tuple[str, str]]:
     finished = False
     while not finished:
 
-        plus_instr = hunk.plusinfo[plus_index]
-        minus_instr = hunk.minusinfo[minus_index]
+        if plus_index == len(hunk.plusinfo):
+            assert minus_index < len(hunk.minusinfo)
+            assert hunk.minusinfo[minus_index] == "-"
+            plus_instr = "x"
+        else:
+            plus_instr = hunk.plusinfo[plus_index]
+
+        if minus_index == len(hunk.minusinfo):
+            assert plus_index < len(hunk.plusinfo)
+            assert hunk.plusinfo[plus_index] == "+"
+            minus_instr = "x"
+        else:
+            minus_instr = hunk.minusinfo[minus_index]
 
         assert not (plus_instr == "+" and minus_instr == "-")
         assert not (plus_instr == "^" and minus_instr == " ")
@@ -69,7 +80,7 @@ def process_hunk(hunk: Hunk) -> List[Tuple[str, str]]:
                 common_length = 0
 
             start = plus_index
-            while hunk.plusinfo[plus_index] == "+":
+            while plus_index < len(hunk.plusinfo) and hunk.plusinfo[plus_index] == "+":
                 plus_index += 1
             spans.append(("diffplus", hunk.plus[start:plus_index]))
 
@@ -79,7 +90,7 @@ def process_hunk(hunk: Hunk) -> List[Tuple[str, str]]:
                 common_length = 0
 
             start = minus_index
-            while hunk.minusinfo[minus_index] == "-":
+            while minus_index < len(hunk.minusinfo) and hunk.minusinfo[minus_index] == "-":
                 minus_index += 1
             spans.append(("diffminus", hunk.minus[start:minus_index]))
 
@@ -91,8 +102,9 @@ def process_hunk(hunk: Hunk) -> List[Tuple[str, str]]:
             start_plus = plus_index
             start_minus = minus_index
 
-            while hunk.plusinfo[plus_index] == "^":
+            while plus_index < len(hunk.plusinfo) and hunk.plusinfo[plus_index] == "^":
                 assert hunk.minusinfo[minus_index] == "^"
+                assert minus_index < len(hunk.minusinfo)
                 plus_index += 1
                 minus_index += 1
 
