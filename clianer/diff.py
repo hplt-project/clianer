@@ -2,7 +2,6 @@
 from difflib import Differ
 import urwid
 from typing import List, Tuple
-import pudb
 
 def unhandled(key):
     if key in ('q', 'Q'):
@@ -167,16 +166,24 @@ def compute_diff(text1: List[str], text2: List[str]) -> List[urwid.Text]:
             hunk.minusinfo = content
 
         if op == "+":
-            assert op_state == 0 or op_state == 1
+            # assert op_state in [0, 1]
 
             if op_state == 0:
                 assert hunk is None
                 rows.append(urwid.Text(("diffplus whole", content)))
 
-            if op_state == 1:
+            elif op_state == 1:
                 assert hunk is not None
                 hunk.plus = content
                 op_state = 2
+
+            elif op_state == 2:
+                assert hunk.plus is not None and hunk.minus is not None and hunk.plusinfo is None and hunk.minusinfo is None
+                rows.append(urwid.Text(("diffminus whole", hunk.minus)))
+                rows.append(urwid.Text(("diffplus whole", hunk.plus)))
+                hunk = None
+                rows.append(urwid.Text(("diffplus whole", content)))
+                op_state = 0
 
         if op == "?" and op_state == 2:
             assert hunk is not None
@@ -207,131 +214,8 @@ def main():
 6. Cat is better.
 '''.splitlines(keepends=True)
 
-
     rows = compute_diff(text1, text2)
     urwid.MainLoop(urwid.ListBox(rows), unhandled_input=unhandled, palette=palette).run()
-
-
-
-def unused():
-
-    text1 = '''1. Beautiful is better than ugly.
-2. Explicit is better than implicit.
-3. Simple is better than complex.
-4. Complexy is better than complicated.
-6. Cat is better than dog.
-'''.splitlines(keepends=True)
-
-    text2 = '''1. Beautiful is better than ugly.
-3.   Simple is better than complex.
-4. Complicatedf is better than complex.
-5. Flat is better than nested.
-6. Cat is better.
-'''.splitlines(keepends=True)
-
-    d = Differ()
-
-
-    rows = []
-
-    import itertools
-    prev = None
-    for line in itertools.chain(d.compare(text1, text2),  [" "]):
-        line = line.rstrip("\r\n")
-
-        if prev is None:
-            prev = line
-            continue
-
-        if prev[0] == "?":
-            prev = line
-            continue
-
-
-
-        # # if prev starts with "+", it belongs to the right
-        # if prev[0] == "+":
-
-
-
-        # if line starts with "?", we need to adapt the markup
-        if line[0] == "?":
-            assert prev[0] == "+" or prev[0] == "-"
-            global_mode = "diffplus whole" if prev[0] == "+" else "diffminus whole"
-
-            string = prev[2:].rstrip("\r\n")
-            instructions = line[2:].rstrip("\r\n")
-
-            texts = []
-
-            start = 0
-            mode = None
-            for i, c in enumerate(instructions):
-                if c == " ":
-                    if mode == "-":
-                        texts.append(("diffminus", string[start:i]))
-                        start = i
-                    if mode == "+":
-                        texts.append(("diffplus", string[start:i]))
-                        start = i
-                    mode = None
-
-                if c == "-":
-                    if mode == "+":
-                        texts.append(("diffplus", string[start:i]))
-                        start = i
-                    if mode is None:
-                        texts.append((global_mode, string[start:i]))
-                        start = i
-                    mode = c
-
-                if c == "+":
-                    if mode == "-":
-                        texts.append(("diffminus", string[start:i]))
-                        start = i
-                    if mode is None:
-                        texts.append((global_mode, string[start:i]))
-                        start = i
-                    mode = c
-
-                if c == "^":
-                    assert mode is None
-                    texts.append((global_mode, string[start:i]))
-                    texts.append(("diffminus", string[i]))
-                    start = i + 1
-
-            if mode == "-":
-                texts.append(("diffminus", string[start:i]))
-            if mode == "+":
-                texts.append(("diffplus", string[start:i]))
-            if mode is None:
-                texts.append((global_mode, string[start:i]))
-
-            if len(string) > len(instructions):
-                texts.append((global_mode, string[len(instructions):]))
-
-            rows.append(urwid.Text(texts))
-            prev = line
-            continue
-
-        if prev[0] == "+":
-            rows.append(urwid.Text(("diffplus whole", prev[2:])))
-
-        # if it starts with a "-", it belongs to the left
-        if prev[0] == "-":
-            rows.append(urwid.Text(("diffminus whole", prev[2:])))
-
-        # if it starts with a " ", it belongs to both
-        if prev[0] == " ":
-            rows.append(urwid.Text(prev[2:]))
-            #rows.append(urwid.Text(prev))
-
-        prev = line
-
-
-
-    urwid.MainLoop(urwid.ListBox(rows), unhandled_input=unhandled, palette=palette).run()
-
 
 
 if __name__ == '__main__':
