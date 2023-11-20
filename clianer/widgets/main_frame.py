@@ -22,10 +22,14 @@ class ClianerFrame(urwid.WidgetWrap):
         self.body = urwid.Columns([(40, self.filter_list), self.datasetView])
         self.header = urwid.AttrMap(urwid.Text("  File"), "options")
 
-        self.footer = urwid.Columns([
-            urwid.AttrMap(urwid.Text("F3: Add Filter"), "options"),
-            urwid.AttrMap(urwid.Text("Q: Quit"), "options")
-        ])
+        self.footer = urwid.AttrMap(urwid.Columns([
+            urwid.Text([("options key", "F2"), "Select Dataset"]),
+            urwid.Text([("options key", "F3"), "Add Filter"]),
+            urwid.Text([("options key", "F4"), "Diff"]),
+            urwid.Text([("options key", "F5"), "Original"]),
+            urwid.Text([("options key", "F6"), "Cleaned"]),
+            urwid.Text([("options key", "F10"), "Quit"])
+        ]), "options")
 
         self.top = urwid.Frame(
             self.body, header=self.header, footer=self.footer)
@@ -33,7 +37,7 @@ class ClianerFrame(urwid.WidgetWrap):
         super().__init__(self.top)
 
     def keypress(self, size, key):
-        if key == "q" or key == "Q":
+        if key == "q" or key == "Q" or key == "f10":
             if self.dialog is None:
                 raise urwid.ExitMainLoop()
 
