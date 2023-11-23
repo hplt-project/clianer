@@ -16,10 +16,10 @@ class ClianerFrame(urwid.WidgetWrap):
         self.dialog = None
         self.filter_list = FilterList()
         self.dataset = None
-        self.datasetView = DatasetView()
+        self.dataset_view = DatasetView()
         self.langs = ["en", "ga"]
 
-        self.body = urwid.Columns([(40, self.filter_list), self.datasetView])
+        self.body = urwid.Columns([(40, self.filter_list), self.dataset_view])
         self.header = urwid.AttrMap(urwid.Text("  File"), "options")
 
         self.footer = urwid.AttrMap(urwid.Columns([
@@ -116,10 +116,10 @@ class ClianerFrame(urwid.WidgetWrap):
         self.update_data()
 
     def show_orig(self):
-        self.datasetView.show(self.loaded_data[0].stdout, title=self.dataset)
+        self.dataset_view.show(self.loaded_data[0].stdout, title=self.dataset)
 
     def show_clean(self):
-        self.datasetView.show(self.loaded_data[-1].stdout, title=self.dataset)
+        self.dataset_view.show(self.loaded_data[-1].stdout, title=self.dataset)
 
     def show_diff(self, rev1, rev2):
         #assert rev1 < rev2
@@ -135,12 +135,12 @@ class ClianerFrame(urwid.WidgetWrap):
         rev2_src = [item[self.langs[0]] for item in rev2_data]
         rev2_tgt = [item[self.langs[1]] for item in rev2_data]
 
-        self.datasetView.show_diff(
+        self.dataset_view.show_diff(
             rev1_src, rev1_tgt, rev2_src, rev2_tgt, title=self.dataset)
 
     def update_data(self):
         self.loaded_data = asyncio.run(self.load_data())
-        self.datasetView.show(self.loaded_data[-1].stdout, title=self.dataset)
+        self.dataset_view.show(self.loaded_data[-1].stdout, title=self.dataset)
 
     async def load_data(self):
         filters = list(self.filter_list.get_filters())
