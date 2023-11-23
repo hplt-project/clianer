@@ -9,6 +9,7 @@ from clianer.widgets.dataset_view import DatasetView
 from clianer.widgets.filter_list import FilterList
 from clianer.widgets.add_filter import AddFilterDialog, EditFilterDialog
 from clianer.widgets.select_dataset import SelectDatasetDialog
+from clianer.widgets.dialog import ErrorDialog
 
 
 class ClianerFrame(urwid.WidgetWrap):
@@ -60,7 +61,7 @@ class ClianerFrame(urwid.WidgetWrap):
 
         return super().keypress(size, key)
 
-    def openDialog(self, widget, tag, callback, user_args=None):
+    def openDialog(self, widget, tag, callback=None, user_args=None):
         assert self.dialog is None
         self.dialog = tag
         self._w = widget.overlay(self._w)
@@ -71,7 +72,8 @@ class ClianerFrame(urwid.WidgetWrap):
             urwid.disconnect_signal(
                 self._w[1], "close", callback_wrapper)
             self._w = self._w[0]
-            callback(widget, *args, **kwargs)
+            if callback is not None:
+                callback(widget, *args, **kwargs)
 
         urwid.connect_signal(
             self._w[1], "close", callback_wrapper)
@@ -87,6 +89,10 @@ class ClianerFrame(urwid.WidgetWrap):
     def openSelectDatasetDialog(self):
         widget = SelectDatasetDialog()
         self.openDialog(widget, "sel_dataset", self.selectDatasetDialogClosed)
+
+    def openErrorDialog(self, error_msg):
+        widget = ErrorDialog(error_msg)
+        self.openDialog(widget, "error")
 
     def addFilterDialogClosed(self, widget, filter_spec):
         if filter_spec is not None:
@@ -140,7 +146,13 @@ class ClianerFrame(urwid.WidgetWrap):
 
     def update_data(self):
         self.loaded_data = asyncio.run(self.load_data())
-        self.dataset_view.show(self.loaded_data[-1].stdout, title=self.dataset)
+
+        for i in range(len(self.loaded_data)):
+            if self.loaded_data[i].returncode != 0:
+                self.openErrorDialog(self.loaded_data[i].stderr)
+                return
+
+        self.show_clean()
 
     async def load_data(self):
         filters = list(self.filter_list.get_filters())

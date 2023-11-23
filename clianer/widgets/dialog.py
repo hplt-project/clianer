@@ -1,4 +1,5 @@
 import urwid
+from clianer.widgets.button import CustomButton
 
 
 class Dialog(urwid.WidgetWrap):
@@ -54,3 +55,20 @@ class Dialog(urwid.WidgetWrap):
             self._emit("close", None)
         else:
             return super().keypress(size, key)
+
+
+class ErrorDialog(Dialog):
+
+    def __init__(self, error_msg):
+        self.error_msg = error_msg
+
+        self.text = urwid.Text(self.error_msg)
+        self.close_button = CustomButton(
+            "Close", on_press=lambda b: self._emit("close", None))
+        self.top = urwid.ListBox([
+            self.text,
+            urwid.Divider(),
+            self.close_button])
+
+        urwid.register_signal(self.__class__, ["close"])
+        super().__init__(self.top, "Error")
