@@ -1,10 +1,10 @@
 1. Beautiful is better than ugly.	Lepší pěkný než hnusný
-3.   Simple is better than complex.	Lepší jednoduchý než složitý
-4. Complicatedf is better than complex.	lepší komplexnost nežli demence
-5. Flat is better than nested.	Lepší byt než hnízdo
-6. Cat is better.	kočky jsou lepší jak psi
-7. Flat is better than nested.	Lepší byt než hnízdo
-8. Cat is better.	kočky jsou lepší jak psi
-ahoj	beta
+2. Explicit is better than implicit.	Lepší explicitní než implicitní
+3. Simple is better than complex.	Lepší jednoduchý než složitý
+4. Complexy is better than complicated.	lepší komplexnost než demence
+6. Cat is better than dog.	kočky josu lepší jak psi
+7. Complexy is better than complicated.	Lepší byt než hnízdo
+8. Cat is better than dog.	kočky jsou lepší jak psi
+ahoj	bet
 bravo	delta
-beat	fero
+abeat	fero
