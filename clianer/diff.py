@@ -40,13 +40,14 @@ def process_hunk(hunk: Hunk) -> List[Tuple[str, str]]:
     plus_index: int = 0
     minus_index: int = 0
 
-    hunk.plusinfo = hunk.plusinfo.ljust(len(hunk.plus), " ")
-    hunk.minusinfo = hunk.minusinfo.ljust(len(hunk.minus), " ")
+    hunk.plusinfo = hunk.plusinfo.ljust(len(hunk.plus), " ")  # this is a bug
+    hunk.minusinfo = hunk.minusinfo.ljust(len(hunk.minus), " ") ## This is a bug
 
     assert len(hunk.plusinfo) == len(hunk.plus)
     assert len(hunk.minusinfo) == len(hunk.minus)
 
     assert hunk.plusinfo.count("^") == hunk.minusinfo.count("^")
+    print(hunk.plusinfo.replace(" ", "X"),"|||", hunk.minusinfo.replace(" ", "Y"))
     assert hunk.plusinfo.count(" ") == hunk.minusinfo.count(" ")
 
     start_common = 0
@@ -138,6 +139,8 @@ def compute_diff(text1: List[str], text2: List[str]) -> List[urwid.Text]:
 
     d = Differ()
     for line in d.compare(text1, text2):
+        print(line.rstrip("\r\n"))
+        #continue
         line = line.rstrip("\r\n")
 
         op = line[0]
@@ -205,6 +208,9 @@ def main():
 3. Simple is better than complex.
 4. Complexy is better than complicated.
 6. Cat is better than dog.
+ahoj\tbet
+bravo\tdelta
+abeat\tfero
 '''.splitlines(keepends=True)
 
     text2 = '''1. Beautiful is better than ugly.
@@ -212,6 +218,9 @@ def main():
 4. Complicatedf is better than complex.
 5. Flat is better than nested.
 6. Cat is better.
+ahoj\tbeta
+bravo\tdelta
+beat\tfero
 '''.splitlines(keepends=True)
 
     rows = compute_diff(text1, text2)
