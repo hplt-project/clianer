@@ -1,12 +1,15 @@
+from decimal import Decimal
 from typing import Any, Dict
 
 import urwid
+import urwid.numedit
 
 from clianer.widgets.button import CustomButton
 from clianer.widgets.dialog import Dialog
-from opuscleaner.filters import (get_global_filters, FilterParameter,
-                                 FilterParameterTuple, FilterParameterList,
-                                 FilterType)
+from opuscleaner.filters import (
+    get_global_filters, FilterParameter, FilterParameterTuple,
+    FilterParameterList, FilterType, FilterParameterFloat, FilterParameterInt,
+    FilterParameterBool, FilterParameterStr)
 
 
 class AddFilterDialog(Dialog):
@@ -84,10 +87,7 @@ class EditFilterDialog(Dialog):
         super().__init__(self.top, self.filter_spec.name, width=60, height=40)
 
     def _add_parameter_widgets(self, name: str, param: FilterParameter):
-        self.parameter_widget_list.append(urwid.Text(name, align="left"))
-        if param.help:
-            self.parameter_widget_list.append(
-                urwid.Text(param.help, align="left"))
+        #self.parameter_widget_list.append(urwid.Text(name, align="left"))
 
         if isinstance(param, FilterParameterTuple):
             for subparam in param.parameters:
@@ -98,10 +98,54 @@ class EditFilterDialog(Dialog):
             for subparam in param.parameters:
                 self._add_parameter_widgets(subparam)
 
-        # TODO handle different types of parameters
-        editor = urwid.Edit("", str(param.default), align="right")
-        self.filter_args[name] = editor
-        editor = urwid.AttrMap(editor, "dialog edit")
+        if isinstance(param, FilterParameterFloat):
+            # if param.default is not None:
+            #     editor = urwid.numedit.FloatEdit(
+            #         ("dialog edit caption", name + " "),
+            #         Decimal(param.default))
+            # else:
+            #     editor = urwid.numedit.FloatEdit(
+            #         ("dialog edit caption", name + " "))
+            # getter = lambda e=editor: float(e.value())
+
+            if param.default is not None:
+                editor = urwid.Edit(("dialog edit caption", name + ": "),
+                                    str(param.default))
+            else:
+                editor = urwid.Edit(("dialog edit caption", name + ": "))
+
+            getter = editor.get_edit_text
+            editor = urwid.AttrMap(editor, "dialog edit", "dialog edit focus")
+
+        if isinstance(param, FilterParameterInt):
+            editor = urwid.IntEdit(("dialog edit caption", name + " "),
+                                   param.default)
+            getter = editor.value
+            editor = urwid.AttrMap(editor, "dialog edit", "dialog edit focus")
+
+        if isinstance(param, FilterParameterBool):
+            if param.default is not None:
+                editor = urwid.CheckBox(name, param.default)
+            else:
+                editor = urwid.CheckBox(name)
+            getter = editor.get_state
+            editor = urwid.AttrMap(editor, "dialog body", "dialog edit focus")
+
+        if isinstance(param, FilterParameterStr):
+            if param.default is not None:
+                editor = urwid.Edit(("dialog edit caption", name + ": "),
+                                    param.default)
+            else:
+                editor = urwid.Edit(("dialog edit caption", name + ": "))
+            getter = editor.get_edit_text
+            editor = urwid.AttrMap(editor, "dialog edit", "dialog edit focus")
+
+
+        if param.help:
+           self.parameter_widget_list.append(
+               urwid.Text(param.help, align="left"))
+
+        self.filter_args[name] = getter
 
         self.parameter_widget_list.append(editor)
         self.parameter_widget_list.append(urwid.Divider())
@@ -121,7 +165,7 @@ class EditFilterDialog(Dialog):
 
     def save(self, button):
         self._emit("close", self.filter_spec,
-                   {k: v.get_edit_text() for k, v in self.filter_args.items()},
+                   {k: v() for k, v in self.filter_args.items()},
                    self.mono_lang_selector[0].state if self.mono_lang_selector else None)
 
     def cancel(self, button):
