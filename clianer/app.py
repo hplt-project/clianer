@@ -30,8 +30,8 @@ PALETTE = [(None,  "light gray", "dark blue"),
            ("focus data", "black", "dark cyan"),
            ("diffminus", "black", "light red"),
            ("diffplus", "black", "light green"),
-           ("diffminus whole", "light red", "black"),
-           ("diffplus whole", "light green", "black")
+           ("diffminus whole", "black", "light red"),
+           ("diffplus whole", "black ", "light green"),
            ]
 
 
