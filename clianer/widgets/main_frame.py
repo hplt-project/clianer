@@ -51,7 +51,15 @@ class ClianerFrame(urwid.WidgetWrap):
                self.openSelectDatasetDialog()
 
         if key == "f4":
-            self.show_diff(0, -1)
+            if self.body.get_focus_column() == 1:
+                self.show_diff(0, -1)
+            elif self.body.get_focus_column() == 0:
+                index = self.filter_list.get_focused_filter_index()
+                filter_spec, filter_args, filter_lang = \
+                    self.filter_list.filters[index]
+                self.openEditFilterDialog(
+                    index, filter_spec, filter_args,
+                    filter_lang == self.langs[0])
 
         if key == "f5":
             self.show_orig()
@@ -80,11 +88,36 @@ class ClianerFrame(urwid.WidgetWrap):
 
     def openAddFilterDialog(self):
         widget = AddFilterDialog()
-        self.openDialog(widget, "add_filter", self.addFilterDialogClosed)
 
-    def openEditFilterDialog(self, filter_spec):
-        widget = EditFilterDialog(filter_spec)
-        self.openDialog(widget, "edit_filter", self.editFilterDialogClosed)
+        def add_filter_closed(widget, filter_spec):
+            if filter_spec is not None:
+                self.openEditFilterDialog(None, filter_spec)
+
+        self.openDialog(widget, "add_filter", add_filter_closed)
+
+    def openEditFilterDialog(
+            self, index, filter_spec, filter_args=None, filter_lang=None):
+        widget = EditFilterDialog(filter_spec, filter_args, filter_lang)
+
+        def edit_filter_closed(widget, filter_spec, filter_args,
+                               filter_lang_is_src=None):
+            if filter_args is not None:
+                assert filter_spec is not None
+                lang = None
+                if filter_lang_is_src:
+                    lang = self.langs[0]
+                if filter_lang_is_src is False:
+                    lang = self.langs[1]
+
+                if index is None:
+                    self.filter_list.add_filter(filter_spec, filter_args, lang)
+                else:
+                    self.filter_list.update_filter(
+                        index, filter_spec, filter_args, lang)
+
+                self.update_data()
+
+        self.openDialog(widget, "edit_filter", edit_filter_closed)
 
     def openSelectDatasetDialog(self):
         widget = SelectDatasetDialog()
@@ -93,22 +126,6 @@ class ClianerFrame(urwid.WidgetWrap):
     def openErrorDialog(self, error_msg):
         widget = ErrorDialog(error_msg)
         self.openDialog(widget, "error")
-
-    def addFilterDialogClosed(self, widget, filter_spec):
-        if filter_spec is not None:
-            self.openEditFilterDialog(filter_spec)
-
-    def editFilterDialogClosed(self, widget, filter_spec, filter_args,
-                               filter_lang_is_src=None):
-        if filter_args is not None:
-            assert filter_spec is not None
-            lang = None
-            if filter_lang_is_src:
-                lang = self.langs[0]
-            if filter_lang_is_src is False:
-                lang = self.langs[1]
-            self.filter_list.add_filter(filter_spec, filter_args, lang)
-            self.update_data()
 
     def selectDatasetDialogClosed(self, widget, dataset_name):
         if dataset_name is not None:

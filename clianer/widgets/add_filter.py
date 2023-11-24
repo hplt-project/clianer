@@ -36,8 +36,10 @@ class AddFilterDialog(Dialog):
 
 class EditFilterDialog(Dialog):
 
-    def __init__(self, filter_spec):
+    def __init__(self, filter_spec, default_args=None, default_lang_src=None):
         self.filter_spec = filter_spec
+        self.default_args = default_args
+        self.default_lang_src = default_lang_src
 
         description = "No filter description provided"
         if filter_spec.description:
@@ -51,8 +53,15 @@ class EditFilterDialog(Dialog):
         if filter_spec.type == FilterType.MONOLINGUAL:
             self.filter_type_widget_list.append(urwid.Text("Language for monolingual filter:"))
             self.mono_lang_selector = []
-            urwid.RadioButton(self.mono_lang_selector, "Source")
-            urwid.RadioButton(self.mono_lang_selector, "Target")
+            rsrc = urwid.RadioButton(self.mono_lang_selector, "Source")
+            rtgt = urwid.RadioButton(self.mono_lang_selector, "Target")
+
+            if self.default_lang_src is not None:
+                if self.default_lang_src:
+                    rsrc.set_state(True)
+                else:
+                    rtgt.set_state(True)
+
             self.filter_type_widget_list.append(urwid.Columns(self.mono_lang_selector))
         if self.filter_type_widget_list:
             self.filter_type_widget = urwid.Pile(self.filter_type_widget_list)
@@ -108,7 +117,10 @@ class EditFilterDialog(Dialog):
             #         ("dialog edit caption", name + " "))
             # getter = lambda e=editor: float(e.value())
 
-            if param.default is not None:
+            if self.default_args is not None:
+                editor = urwid.Edit(("dialog edit caption", name + ": "),
+                                    str(self.default_args[name]))
+            elif param.default is not None:
                 editor = urwid.Edit(("dialog edit caption", name + ": "),
                                     str(param.default))
             else:
@@ -118,13 +130,19 @@ class EditFilterDialog(Dialog):
             editor = urwid.AttrMap(editor, "dialog edit", "dialog edit focus")
 
         if isinstance(param, FilterParameterInt):
-            editor = urwid.IntEdit(("dialog edit caption", name + " "),
-                                   param.default)
+            if self.default_args is not None:
+                editor = urwid.IntEdit(("dialog edit caption", name + " "),
+                                       self.default_args[name])
+            else:
+                editor = urwid.IntEdit(("dialog edit caption", name + " "),
+                                       param.default)
             getter = editor.value
             editor = urwid.AttrMap(editor, "dialog edit", "dialog edit focus")
 
         if isinstance(param, FilterParameterBool):
-            if param.default is not None:
+            if self.default_args is not None:
+                editor = urwid.CheckBox(name, self.default_args[name])
+            elif param.default is not None:
                 editor = urwid.CheckBox(name, param.default)
             else:
                 editor = urwid.CheckBox(name)
@@ -132,14 +150,16 @@ class EditFilterDialog(Dialog):
             editor = urwid.AttrMap(editor, "dialog body", "dialog edit focus")
 
         if isinstance(param, FilterParameterStr):
-            if param.default is not None:
+            if self.default_args is not None:
+                editor = urwid.Edit(("dialog edit caption", name + ": "),
+                                    self.default_args[name])
+            elif param.default is not None:
                 editor = urwid.Edit(("dialog edit caption", name + ": "),
                                     param.default)
             else:
                 editor = urwid.Edit(("dialog edit caption", name + ": "))
             getter = editor.get_edit_text
             editor = urwid.AttrMap(editor, "dialog edit", "dialog edit focus")
-
 
         if param.help:
            self.parameter_widget_list.append(
