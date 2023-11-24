@@ -35,6 +35,13 @@ class ClianerFrame(urwid.WidgetWrap):
         self.top = urwid.Frame(
             self.body, header=self.header, footer=self.footer)
 
+        def filters_updated(*args):
+            if self.dataset:
+                self.update_data()
+
+        urwid.connect_signal(self.filter_list, "filter_update", filters_updated)
+        #urwid.connect_signal(self.filter_list, "diff_update", self.update_data)
+
         super().__init__(self.top)
 
     def keypress(self, size, key):
@@ -71,7 +78,6 @@ class ClianerFrame(urwid.WidgetWrap):
         if key == "f8" and self.body.get_focus_column() == 0:
             index = self.filter_list.get_focused_filter_index()
             self.filter_list.remove_filter(index)
-            self.update_data()
 
         return super().keypress(size, key)
 
@@ -120,8 +126,6 @@ class ClianerFrame(urwid.WidgetWrap):
                 else:
                     self.filter_list.update_filter(
                         index, filter_spec, filter_args, lang)
-
-                self.update_data()
 
         self.openDialog(widget, "edit_filter", edit_filter_closed)
 

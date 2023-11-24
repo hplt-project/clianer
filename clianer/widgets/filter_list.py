@@ -3,7 +3,6 @@ import urwid
 
 from opuscleaner.filters import FilterStep, FilterType
 
-
 COLLAPSED_ICON = "[+]"
 EXPANDED_ICON = "[-]"
 EMPTY_ICON = "[ ]"
@@ -17,13 +16,14 @@ class FilterItem(urwid.WidgetWrap):
         icon = COLLAPSED_ICON if not self.body.empty else EMPTY_ICON
 
         self.header = urwid.SelectableIcon(
-            icon + " " + self.caption, cursor_position=1)
+            self.format_text(icon), cursor_position=1)
 
-        styled_header = urwid.AttrMap(self.header, None, "selected")
+        self.styled_header = urwid.AttrMap(self.header, "filter", "filter selected")
 
         self.expanded = False
-        self.collapsed_top = styled_header
-        self.expanded_top = urwid.Pile([styled_header, self.body])
+        self.diff = False
+        self.collapsed_top = self.styled_header
+        self.expanded_top = urwid.Pile([self.styled_header, self.body])
 
         super().__init__(self.collapsed_top)
 
@@ -33,8 +33,21 @@ class FilterItem(urwid.WidgetWrap):
         icon = EXPANDED_ICON if self.expanded else COLLAPSED_ICON
         icon = icon if not self.body.empty else EMPTY_ICON
 
-        self.header.set_text(icon + " " + self.caption)
+        self.header.set_text(self.format_text(icon))
         self._w = self.expanded_top if self.expanded else self.collapsed_top
+
+    def toggle_diff(self):
+        self.diff = not self.diff
+
+        if self.diff:
+            self.styled_header.set_attr_map({None: "filter diff"})
+            self.styled_header.set_focus_map({None: "filter diff selected"})
+        else:
+            self.styled_header.set_attr_map({None: "filter"})
+            self.styled_header.set_focus_map({None: "filter selected"})
+
+    def format_text(self, icon):
+        return icon + " " + self.caption
 
     def keypress(self, size, key):
         if key == "tab" or key == "enter" or key == " ":
@@ -74,22 +87,26 @@ class FilterList(urwid.WidgetWrap):
             for filter_step in filters:
                 self.add_filter(filter_step)
 
+        urwid.register_signal(self.__class__, ["filter_update", "diff_update"])
         super().__init__(self.top)
 
     def add_filter(self, filter_spec, filter_args, filter_lang):
         self.filters.append((filter_spec, filter_args, filter_lang))
         self.listWalker.append(
             FilterItem(filter_spec, filter_args, filter_lang))
+        self._emit("filter_update")
 
     def update_filter(self, filter_index, filter_spec, filter_args,
                       filter_lang):
         self.filters[filter_index] = (filter_spec, filter_args, filter_lang)
         self.listWalker[filter_index] = FilterItem(
             filter_spec, filter_args, filter_lang)
+        self._emit("filter_update")
 
     def remove_filter(self, filter_index):
         self.filters.pop(filter_index)
         self.listWalker.pop(filter_index)
+        self._emit("filter_update")
 
     def get_filters(self):
         for (filter_spec, filter_args, filter_lang) in self.filters:
@@ -103,6 +120,16 @@ class FilterList(urwid.WidgetWrap):
     def clear_filters(self):
         self.filters = []
         self.listWalker.clear()
+        self._emit("filter_update")
 
     def get_focused_filter_index(self):
         return self.listWalker.get_focus()[1]
+
+    def keypress(self, size, key):
+
+        if key == "d":
+            filter_index = self.get_focused_filter_index()
+            self.listWalker[filter_index].toggle_diff()
+            self._emit("diff_update")
+
+        return super().keypress(size, key)
