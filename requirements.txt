@@ -1,4 +1,3 @@
 urwid
 pydantic
 opuscleaner
-diff_match_patch
