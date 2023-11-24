@@ -3,7 +3,9 @@ import urwid
 
 from opuscleaner.server import get_sample
 from opuscleaner.datasets import list_datasets
-from opuscleaner.server import ParsedFilterOutput
+from opuscleaner.server import ParsedFilterOutput, FilterPipelinePatch, \
+    api_get_dataset_filters, api_update_dataset_filters
+from opuscleaner.filters import get_global_filter
 
 from clianer.widgets.dataset_view import DatasetView
 from clianer.widgets.filter_list import FilterList
@@ -42,6 +44,9 @@ class ClianerFrame(urwid.WidgetWrap):
         def filters_updated(*args):
             if self.dataset:
                 self.update_data()
+                api_update_dataset_filters(
+                    self.dataset,
+                    FilterPipelinePatch(filters=list(self.filter_list.get_filters())))
 
         def diff_updated(w):
             if w.diff_start is not None:
@@ -150,13 +155,18 @@ class ClianerFrame(urwid.WidgetWrap):
 
     def selectDatasetDialogClosed(self, widget, dataset_name):
         if dataset_name is not None:
-            # TODO ask to save filters
-            # reset filters
-            self.filter_list.clear_filters()
             self.open_dataset(dataset_name)
 
     def open_dataset(self, name):
+        # TODO ask to save filters
+        # reset filters
+        self.filter_list.clear_filters()
         self.dataset = name
+        pipeline = api_get_dataset_filters(name)
+        for step in pipeline.filters:
+            self.filter_list.add_filter(get_global_filter(step.filter),
+                                        step.parameters, step.language)
+
         self.update_data()
 
     def show_orig(self):

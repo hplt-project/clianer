@@ -141,7 +141,7 @@ class EditFilterDialog(Dialog):
 
         if isinstance(param, FilterParameterBool):
             if self.default_args is not None:
-                editor = urwid.CheckBox(name, self.default_args[name])
+                editor = urwid.CheckBox(name, bool(self.default_args[name]))
             elif param.default is not None:
                 editor = urwid.CheckBox(name, param.default)
             else:
