@@ -55,17 +55,23 @@ class ClianerFrame(urwid.WidgetWrap):
                 self.show_diff(0, -1)
             elif self.body.get_focus_column() == 0:
                 index = self.filter_list.get_focused_filter_index()
-                filter_spec, filter_args, filter_lang = \
-                    self.filter_list.filters[index]
-                self.openEditFilterDialog(
-                    index, filter_spec, filter_args,
-                    filter_lang == self.langs[0])
+                if index is not None:
+                    filter_spec, filter_args, filter_lang = \
+                        self.filter_list.filters[index]
+                    self.openEditFilterDialog(
+                        index, filter_spec, filter_args,
+                        filter_lang == self.langs[0])
 
         if key == "f5":
             self.show_orig()
 
         if key == "f6":
             self.show_clean()
+
+        if key == "f8" and self.body.get_focus_column() == 0:
+            index = self.filter_list.get_focused_filter_index()
+            self.filter_list.remove_filter(index)
+            self.update_data()
 
         return super().keypress(size, key)
 

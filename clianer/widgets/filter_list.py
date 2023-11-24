@@ -88,8 +88,8 @@ class FilterList(urwid.WidgetWrap):
             filter_spec, filter_args, filter_lang)
 
     def remove_filter(self, filter_index):
-        self.filters.remove(filter_item)
-        self.listWalker.remove(filter_index)
+        self.filters.pop(filter_index)
+        self.listWalker.pop(filter_index)
 
     def get_filters(self):
         for (filter_spec, filter_args, filter_lang) in self.filters:
@@ -106,10 +106,3 @@ class FilterList(urwid.WidgetWrap):
 
     def get_focused_filter_index(self):
         return self.listWalker.get_focus()[1]
-
-    def keypress(self, size, key):
-        if key == "f8":
-            #self.listWalker[self.listWalker.focus_position]
-            pass
-
-        return super().keypress(size, key)
