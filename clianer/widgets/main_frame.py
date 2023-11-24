@@ -20,6 +20,10 @@ class ClianerFrame(urwid.WidgetWrap):
         self.dataset_view = DatasetView()
         self.langs = ["en", "ga"]
 
+        self.rev1 = 0
+        self.rev2 = -1
+        self.showing_diff = False
+
         self.body = urwid.Columns([(40, self.filter_list), self.dataset_view])
         self.header = urwid.AttrMap(urwid.Text("  File"), "options")
 
@@ -39,8 +43,14 @@ class ClianerFrame(urwid.WidgetWrap):
             if self.dataset:
                 self.update_data()
 
+        def diff_updated(w):
+            if w.diff_start is not None:
+                self.set_diff(w.diff_start, w.diff_end + 1)
+            else:
+                self.set_diff(0, -1)
+
         urwid.connect_signal(self.filter_list, "filter_update", filters_updated)
-        #urwid.connect_signal(self.filter_list, "diff_update", self.update_data)
+        urwid.connect_signal(self.filter_list, "diff_update", diff_updated)
 
         super().__init__(self.top)
 
@@ -59,7 +69,8 @@ class ClianerFrame(urwid.WidgetWrap):
 
         if key == "f4":
             if self.body.get_focus_column() == 1:
-                self.show_diff(0, -1)
+                self.set_diff(0, -1)
+                self.show_diff()
             elif self.body.get_focus_column() == 0:
                 index = self.filter_list.get_focused_filter_index()
                 if index is not None:
@@ -154,14 +165,22 @@ class ClianerFrame(urwid.WidgetWrap):
     def show_clean(self):
         self.dataset_view.show(self.loaded_data[-1].stdout, title=self.dataset)
 
-    def show_diff(self, rev1, rev2):
-        #assert rev1 < rev2
-        #assert rev1 >= 0
+    def set_diff(self, rev1, rev2):
         assert rev1 < len(self.loaded_data)
         assert rev2 < len(self.loaded_data)
 
-        rev1_data = self.loaded_data[rev1].stdout
-        rev2_data = self.loaded_data[rev2].stdout
+        assert rev1 < rev2 or rev2 == -1
+        assert rev1 >= 0
+
+        self.rev1 = rev1
+        self.rev2 = rev2
+
+        if self.showing_diff:
+            self.show_diff()
+
+    def show_diff(self):
+        rev1_data = self.loaded_data[self.rev1].stdout
+        rev2_data = self.loaded_data[self.rev2].stdout
 
         rev1_src = [item[self.langs[0]] for item in rev1_data]
         rev1_tgt = [item[self.langs[1]] for item in rev1_data]
@@ -171,6 +190,8 @@ class ClianerFrame(urwid.WidgetWrap):
         self.dataset_view.show_diff(
             rev1_src, rev1_tgt, rev2_src, rev2_tgt, title=self.dataset)
 
+        self.showing_diff = True
+
     def update_data(self):
         self.loaded_data = asyncio.run(self.load_data())
 
@@ -179,6 +200,7 @@ class ClianerFrame(urwid.WidgetWrap):
                 self.openErrorDialog(self.loaded_data[i].stderr)
                 return
 
+        self.set_diff(0, -1)
         self.show_clean()
 
     async def load_data(self):

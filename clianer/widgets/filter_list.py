@@ -87,6 +87,9 @@ class FilterList(urwid.WidgetWrap):
             for filter_step in filters:
                 self.add_filter(filter_step)
 
+        self.diff_start = None
+        self.diff_end = None
+
         urwid.register_signal(self.__class__, ["filter_update", "diff_update"])
         super().__init__(self.top)
 
@@ -125,11 +128,49 @@ class FilterList(urwid.WidgetWrap):
     def get_focused_filter_index(self):
         return self.listWalker.get_focus()[1]
 
+    def toggle_filter_diffs(self, filter_index):
+        if self.diff_start is None:
+            self.diff_start = filter_index
+            self.diff_end = filter_index
+            self.listWalker[filter_index].toggle_diff()
+
+        elif self.diff_start == filter_index and self.diff_end == filter_index:
+            self.diff_start = None
+            self.diff_end = None
+            self.listWalker[filter_index].toggle_diff()
+
+        elif self.diff_start == filter_index:
+            self.diff_start += 1
+            self.listWalker[filter_index].toggle_diff()
+
+        elif self.diff_end == filter_index:
+            self.diff_end -= 1
+            self.listWalker[filter_index].toggle_diff()
+
+        elif filter_index == self.diff_start - 1:
+            self.diff_start -= 1
+            self.listWalker[filter_index].toggle_diff()
+
+        elif filter_index == self.diff_end + 1:
+            self.diff_end += 1
+            self.listWalker[filter_index].toggle_diff()
+
+        else:
+            # turn everything between start and end off
+            for i in range(self.diff_start, self.diff_end + 1):
+                self.listWalker[i].toggle_diff()
+
+            self.diff_start = filter_index
+            self.diff_end = filter_index
+            self.listWalker[filter_index].toggle_diff()
+
+        self._emit("diff_update")
+
+
     def keypress(self, size, key):
 
         if key == "d":
             filter_index = self.get_focused_filter_index()
-            self.listWalker[filter_index].toggle_diff()
-            self._emit("diff_update")
+            self.toggle_filter_diffs(filter_index)
 
         return super().keypress(size, key)
