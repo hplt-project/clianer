@@ -63,6 +63,8 @@ class ClianerFrame(urwid.WidgetWrap):
         super().__init__(self.top)
 
     def keypress(self, size, key):
+        focus_column = self.body.get_focus_column()
+
         if key == "q" or key == "Q" or key == "f10":
             if self.dialog is None:
                 raise urwid.ExitMainLoop()
@@ -76,10 +78,10 @@ class ClianerFrame(urwid.WidgetWrap):
                self.openSelectDatasetDialog()
 
         if key == "f4":
-            if self.body.get_focus_column() == 1:
+            if focus_column == 1:
                 self.set_diff(0, -1)
                 self.show_diff()
-            elif self.body.get_focus_column() == 0:
+            elif focus_column == 0:
                 index = self.filter_list.get_focused_filter_index()
                 if index is not None:
                     filter_spec, filter_args, filter_lang = \
@@ -98,7 +100,7 @@ class ClianerFrame(urwid.WidgetWrap):
             if self.dialog is None and self.dataset is not None:
                self.openAssignCategoriesDialog()
 
-        if key == "f8" and self.body.get_focus_column() == 0:
+        if key == "f8" and self.filter_list.filters and focus_column == 0:
             index = self.filter_list.get_focused_filter_index()
             self.filter_list.remove_filter(index)
 
@@ -170,14 +172,14 @@ class ClianerFrame(urwid.WidgetWrap):
 
     def open_dataset(self, name):
         # TODO ask to save filters
-        # reset filters
+
+        self.dataset = None
         self.filter_list.clear_filters()
-        self.dataset = name
         pipeline = api_get_dataset_filters(name)
         for step in pipeline.filters:
             self.filter_list.add_filter(get_global_filter(step.filter),
                                         step.parameters, step.language)
-
+        self.dataset = name
         self.update_data()
 
     def show_orig(self):
