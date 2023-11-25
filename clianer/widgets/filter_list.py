@@ -94,6 +94,7 @@ class FilterList(urwid.WidgetWrap):
         super().__init__(self.top)
 
     def add_filter(self, filter_spec, filter_args, filter_lang):
+        self.untoggle_all_diffs()
         self.filters.append((filter_spec, filter_args, filter_lang))
         self.listWalker.append(
             FilterItem(filter_spec, filter_args, filter_lang))
@@ -107,6 +108,7 @@ class FilterList(urwid.WidgetWrap):
         self._emit("filter_update")
 
     def remove_filter(self, filter_index):
+        self.untoggle_all_diffs()
         self.filters.pop(filter_index)
         self.listWalker.pop(filter_index)
         self._emit("filter_update")
