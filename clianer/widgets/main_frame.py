@@ -11,6 +11,7 @@ from clianer.widgets.dataset_view import DatasetView
 from clianer.widgets.filter_list import FilterList
 from clianer.widgets.add_filter import AddFilterDialog, EditFilterDialog
 from clianer.widgets.select_dataset import SelectDatasetDialog
+from clianer.widgets.assign_category import AssignCategoriesDialog
 from clianer.widgets.dialog import ErrorDialog
 
 
@@ -35,6 +36,8 @@ class ClianerFrame(urwid.WidgetWrap):
             urwid.Text([("options key", "F4"), "Diff"]),
             urwid.Text([("options key", "F5"), "Original"]),
             urwid.Text([("options key", "F6"), "Cleaned"]),
+            urwid.Text([("options key", "F7"), "Categories"]),
+            urwid.Text([("options key", "F8"), "Remove Filter"]),
             urwid.Text([("options key", "F10"), "Quit"])
         ]), "options")
 
@@ -65,7 +68,7 @@ class ClianerFrame(urwid.WidgetWrap):
                 raise urwid.ExitMainLoop()
 
         if key == "f3":
-            if self.dialog is None:
+            if self.dialog is None and self.dataset is not None:
                 self.openAddFilterDialog()
 
         if key == "f2":
@@ -90,6 +93,10 @@ class ClianerFrame(urwid.WidgetWrap):
 
         if key == "f6":
             self.show_clean()
+
+        if key == "f7":
+            if self.dialog is None and self.dataset is not None:
+               self.openAssignCategoriesDialog()
 
         if key == "f8" and self.body.get_focus_column() == 0:
             index = self.filter_list.get_focused_filter_index()
@@ -148,6 +155,10 @@ class ClianerFrame(urwid.WidgetWrap):
     def openSelectDatasetDialog(self):
         widget = SelectDatasetDialog()
         self.openDialog(widget, "sel_dataset", self.selectDatasetDialogClosed)
+
+    def openAssignCategoriesDialog(self):
+        widget = AssignCategoriesDialog(self.dataset)
+        self.openDialog(widget, "assign_categories")
 
     def openErrorDialog(self, error_msg):
         widget = ErrorDialog(error_msg)
