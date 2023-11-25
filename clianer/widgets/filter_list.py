@@ -193,7 +193,7 @@ class FilterList(urwid.WidgetWrap):
             if index > 0:
                 self.listWalker[index], self.listWalker[index - 1] = \
                     self.listWalker[index - 1], self.listWalker[index]
-                self.filters[filter_index], self.filters[index - 1] = \
+                self.filters[index], self.filters[index - 1] = \
                     self.filters[index - 1], self.filters[index]
                 # move focus up
                 self.listWalker.set_focus(index - 1)
