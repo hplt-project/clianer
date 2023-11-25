@@ -33,7 +33,7 @@ class ClianerFrame(urwid.WidgetWrap):
         self.footer = urwid.AttrMap(urwid.Columns([
             urwid.Text([("options key", "F2"), "Select Dataset"]),
             urwid.Text([("options key", "F3"), "Add Filter"]),
-            urwid.Text([("options key", "F4"), "Diff"]),
+            urwid.Text([("options key", "F4"), "Edit Filter / Show Diff"]),
             urwid.Text([("options key", "F5"), "Original"]),
             urwid.Text([("options key", "F6"), "Cleaned"]),
             urwid.Text([("options key", "F7"), "Categories"]),
