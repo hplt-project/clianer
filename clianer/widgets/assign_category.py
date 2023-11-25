@@ -22,6 +22,7 @@ class AssignCategoriesDialog(Dialog):
                      and self.dataset in self.cat_mapping.mapping[cat.name])
             self.checkboxes.append(urwid.CheckBox(cat.name, state=state))
         checkboxes_widget = urwid.Pile(self.checkboxes + [urwid.Divider()])
+        #checkboxes_widget = urwid.Filler(checkboxes_widget, valign="top")
 
         # create Save and Cancel buttons
         self.save_button = CustomButton("Save", self.save)
@@ -29,12 +30,11 @@ class AssignCategoriesDialog(Dialog):
         self.buttons = urwid.Padding(
             urwid.Columns([self.save_button, self.cancel_button], 4), "center")
 
-        self.listbox = urwid.ListBox(
-            urwid.SimpleFocusListWalker([checkboxes_widget, self.buttons]))
+        self.listbox = urwid.ListBox([checkboxes_widget, self.buttons])
 
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(
-            self.listbox, f"Assign categories: {dataset}", width=50, height=10)
+            self.listbox, f"Assign categories: {dataset}", width=60, height=12)
 
     def save(self, button):
         # update categories
