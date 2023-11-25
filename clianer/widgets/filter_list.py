@@ -128,6 +128,17 @@ class FilterList(urwid.WidgetWrap):
     def get_focused_filter_index(self):
         return self.listWalker.get_focus()[1]
 
+    def untoggle_all_diffs(self):
+        if self.diff_start is None:
+            return
+
+        for i in range(self.diff_start, self.diff_end + 1):
+            self.listWalker[i].toggle_diff()
+
+        self.diff_start = None
+        self.diff_end = None
+        self._emit("diff_update")
+
     def toggle_filter_diffs(self, filter_index):
         if self.diff_start is None:
             self.diff_start = filter_index
@@ -170,7 +181,34 @@ class FilterList(urwid.WidgetWrap):
     def keypress(self, size, key):
 
         if key == "d":
-            filter_index = self.get_focused_filter_index()
-            self.toggle_filter_diffs(filter_index)
+            index = self.get_focused_filter_index()
+            self.toggle_filter_diffs(index)
+
+        if key == "r":
+            self.untoggle_all_diffs()
+
+        if key == "w":
+            # move focused filter up
+            index = self.get_focused_filter_index()
+            if index > 0:
+                self.listWalker[index], self.listWalker[index - 1] = \
+                    self.listWalker[index - 1], self.listWalker[index]
+                self.filters[filter_index], self.filters[index - 1] = \
+                    self.filters[index - 1], self.filters[index]
+                # move focus up
+                self.listWalker.set_focus(index - 1)
+                self._emit("filter_update")
+
+        if key == "s":
+            # move focused filter down
+            index = self.get_focused_filter_index()
+            if index < len(self.listWalker) - 1:
+                self.listWalker[index], self.listWalker[index + 1] = \
+                    self.listWalker[index + 1], self.listWalker[index]
+                self.filters[index], self.filters[index + 1] = \
+                    self.filters[index + 1], self.filters[index]
+                # move focus down
+                self.listWalker.set_focus(index + 1)
+                self._emit("filter_update")
 
         return super().keypress(size, key)
