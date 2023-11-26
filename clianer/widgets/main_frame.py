@@ -159,11 +159,11 @@ class ClianerFrame(urwid.WidgetWrap):
         self.openDialog(widget, "edit_filter", edit_filter_closed)
 
     def openSelectDatasetDialog(self):
-        widget = SelectDatasetDialog()
+        widget = SelectDatasetDialog("Open Dataset", self.dataset)
         self.openDialog(widget, "sel_dataset", self.selectDatasetDialogClosed)
 
     def openImportFilterDialog(self):
-        widget = SelectDatasetDialog(title="Import Filters from Dataset")
+        widget = SelectDatasetDialog("Import Dataset Filters", self.dataset)
         self.openDialog(widget, "import_filter", self.importFilterDialogClosed)
 
     def openAssignCategoriesDialog(self):

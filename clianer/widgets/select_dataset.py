@@ -10,11 +10,11 @@ from opuscleaner.categories import get_mapping
 
 class SelectDatasetDialog(Dialog):
 
-    def __init__(self, title="Select dataset"):
+    def __init__(self, title="Select dataset", current=None):
         # datasets: Dict[str, List[Tuple[str, Path]]]
         self.datasets = list_datasets(DATA_PATH)
         category_mapping = get_mapping()
-
+        focus_index = 0
         have_mapping = []
         for cat in category_mapping.categories:
             if cat.name in category_mapping.mapping:
@@ -39,10 +39,12 @@ class SelectDatasetDialog(Dialog):
             button = CustomButton(
                 label, on_press=self.select_dataset, user_data=dataset_name)
 
+            if current is not None and current == dataset_name:
+                focus_index = len(self.dataset_widgets)
             self.dataset_widgets.append(button)
 
-        self.listbox = urwid.ListBox(
-            urwid.SimpleFocusListWalker(self.dataset_widgets))
+        self.listbox = urwid.ListBox(self.dataset_widgets)
+        self.listbox.set_focus(focus_index)
 
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(self.listbox, title, width=70, height=30)
