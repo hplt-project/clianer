@@ -34,7 +34,7 @@ class AssignCategoriesDialog(Dialog):
 
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(
-            self.listbox, f"Assign categories: {dataset}", width=60, height=12)
+            self.listbox, f"Assign categories: {dataset}", width=75, height=10)
 
     def save(self, button):
         # update categories
