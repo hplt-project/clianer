@@ -31,11 +31,11 @@ class ClianerFrame(urwid.WidgetWrap):
         self.header = urwid.AttrMap(urwid.Text("  File"), "options")
 
         self.footer = urwid.AttrMap(urwid.Columns([
-            urwid.Text([("options key", "F2"), "Select Dataset"]),
+            urwid.Text([("options key", "F2"), "Load Data"]),
             urwid.Text([("options key", "F3"), "Add Filter"]),
             urwid.Text([("options key", "F4"), "Edit Filter / Show Diff"]),
-            urwid.Text([("options key", "F5"), "Original"]),
-            urwid.Text([("options key", "F6"), "Cleaned"]),
+            urwid.Text([("options key", "F5"), "Import Filter / Show Orig"]),
+            urwid.Text([("options key", "F6"), "Show Clean"]),
             urwid.Text([("options key", "F7"), "Categories"]),
             urwid.Text([("options key", "F8"), "Remove Filter"]),
             urwid.Text([("options key", "F10"), "Quit"])
@@ -91,7 +91,11 @@ class ClianerFrame(urwid.WidgetWrap):
                         filter_lang == self.langs[0])
 
         if key == "f5":
-            self.show_orig()
+            if focus_column == 1:
+                self.show_orig()
+            elif focus_column == 0:
+                if self.dialog is None:
+                    self.openImportFilterDialog()
 
         if key == "f6":
             self.show_clean()
@@ -158,6 +162,10 @@ class ClianerFrame(urwid.WidgetWrap):
         widget = SelectDatasetDialog()
         self.openDialog(widget, "sel_dataset", self.selectDatasetDialogClosed)
 
+    def openImportFilterDialog(self):
+        widget = SelectDatasetDialog(title="Import Filters from Dataset")
+        self.openDialog(widget, "import_filter", self.importFilterDialogClosed)
+
     def openAssignCategoriesDialog(self):
         widget = AssignCategoriesDialog(self.dataset)
         self.openDialog(widget, "assign_categories")
@@ -170,9 +178,23 @@ class ClianerFrame(urwid.WidgetWrap):
         if dataset_name is not None:
             self.open_dataset(dataset_name)
 
+    def importFilterDialogClosed(self, widget, dataset_name):
+        if dataset_name is not None:
+            self.import_filters(dataset_name)
+
+    def import_filters(self, dataset_name):
+        self.filter_list.set_signal_emit("filter_update", False)
+
+        filters = api_get_dataset_filters(dataset_name)
+        self.filter_list.clear_filters()
+        for step in filters.filters:
+            self.filter_list.add_filter(get_global_filter(step.filter),
+                                        step.parameters, step.language)
+
+        self.filter_list.set_signal_emit("filter_update", True)
+
     def open_dataset(self, name):
         # TODO ask to save filters
-
         self.dataset = None
         self.filter_list.clear_filters()
         pipeline = api_get_dataset_filters(name)

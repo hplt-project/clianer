@@ -90,15 +90,25 @@ class FilterList(urwid.WidgetWrap):
         self.diff_start = None
         self.diff_end = None
 
+        self._enabled_signals = {"filter_update": True, "diff_update": True}
+
         urwid.register_signal(self.__class__, ["filter_update", "diff_update"])
         super().__init__(self.top)
+
+    def set_signal_emit(self, signal, enable):
+        self._enabled_signals[signal] = enable
+        if enable:
+            self._emit(signal)
+
+    def _emit(self, signal):
+        if self._enabled_signals[signal]:
+            super()._emit(signal)
 
     def add_filter(self, filter_spec, filter_args, filter_lang):
         self.untoggle_all_diffs()
         self.filters.append((filter_spec, filter_args, filter_lang))
         self.listWalker.append(
             FilterItem(filter_spec, filter_args, filter_lang))
-        self._emit("filter_update")
 
     def update_filter(self, filter_index, filter_spec, filter_args,
                       filter_lang):
@@ -125,6 +135,8 @@ class FilterList(urwid.WidgetWrap):
     def clear_filters(self):
         self.filters = []
         self.listWalker.clear()
+        self.diff_start = None
+        self.diff_end = None
         self._emit("filter_update")
 
     def get_focused_filter_index(self):
