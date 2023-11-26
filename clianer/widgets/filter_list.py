@@ -109,6 +109,7 @@ class FilterList(urwid.WidgetWrap):
         self.filters.append((filter_spec, filter_args, filter_lang))
         self.listWalker.append(
             FilterItem(filter_spec, filter_args, filter_lang))
+        self._emit("filter_update")
 
     def update_filter(self, filter_index, filter_spec, filter_args,
                       filter_lang):
