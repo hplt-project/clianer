@@ -7,6 +7,7 @@ import sys
 
 from clianer.widgets.main_frame import ClianerFrame
 from opuscleaner.filters import set_global_filters, list_filters
+from opuscleaner.config import FILTER_PATH
 
 
 PALETTE = [(None,  "light gray", "dark blue"),
@@ -40,13 +41,6 @@ PALETTE = [(None,  "light gray", "dark blue"),
            ]
 
 
-FILTERS_ROOT = "/home/helcl/hplt/OpusCleaner/opuscleaner"
-FILTER_PATHS = os.pathsep.join([
-    os.path.join(FILTERS_ROOT, "filters/**/*.json"),
-    os.path.join(os.path.dirname(__file__), "filters/**/*.json")
-])
-
-
 def get_datasets(location):
     datasets = []
 
@@ -66,7 +60,7 @@ class App:
         self.args = args
         self.main_frame = ClianerFrame()
 
-        set_global_filters(list_filters(FILTER_PATHS))
+        set_global_filters(list_filters(FILTER_PATH))
 
     def run(self):
         urwid.MainLoop(self.main_frame, PALETTE).run()
