@@ -1,5 +1,6 @@
 # CLI-a-ner
-Your command-line buddy for data cleaning.
+
+![image](https://github.com/jindrahelcl/clianer/assets/1842355/740b14be-e6ec-41ab-8282-c06e24ca0072)
 
 
 ## Installation
