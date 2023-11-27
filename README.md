@@ -1,7 +1,6 @@
 # CLI-a-ner
 
-![image](https://github.com/jindrahelcl/clianer/assets/1842355/740b14be-e6ec-41ab-8282-c06e24ca0072)
-
+![image](https://github.com/jindrahelcl/clianer/assets/1842355/24ace9d3-4058-4e41-afff-ef9c0275eea6)
 
 ## Installation
 First, have the [OpusCleaner](https://github.com/hplt-project/OpusCleaner)
