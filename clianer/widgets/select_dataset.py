@@ -44,7 +44,13 @@ class SelectDatasetDialog(Dialog):
             self.dataset_widgets.append(button)
 
         self.listbox = urwid.ListBox(self.dataset_widgets)
-        self.listbox.set_focus(focus_index)
+        if self.dataset_widgets:
+            self.listbox.set_focus(focus_index)
+        else:
+            self.listbox = urwid.Filler(
+                urwid.Text("No datasets found. Adjust $DATA_PATH maybe?"),
+                valign="top",
+                height="pack")
 
         urwid.register_signal(self.__class__, ["close"])
         super().__init__(self.listbox, title, width=70, height=30)
