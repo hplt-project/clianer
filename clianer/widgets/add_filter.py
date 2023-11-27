@@ -1,3 +1,4 @@
+import string
 from decimal import Decimal
 from typing import Any, Dict
 
@@ -33,6 +34,15 @@ class AddFilterDialog(Dialog):
 
     def add_filter(self, button, filter_obj):
         self._emit("close", filter_obj)
+
+    def keypress(self, size, key):
+        if key in string.ascii_letters:
+            for button in self.buttons:
+                if button.get_label().startswith(key.lower()):
+                    self.listbox.set_focus(self.buttons.index(button))
+                    break
+        else:
+            return super().keypress(size, key)
 
 
 class EditFilterDialog(Dialog):
