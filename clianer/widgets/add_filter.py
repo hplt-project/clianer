@@ -19,7 +19,8 @@ class AddFilterDialog(Dialog):
         self.available_filters = get_global_filters()
 
         self.buttons = []
-        for name, filter_spec in self.available_filters.items():
+        for name, filter_spec in sorted(
+                self.available_filters.items(), key=lambda x: x[0]):
             self.buttons.append(
                 CustomButton(filter_spec.name, on_press=self.add_filter,
                              user_data=filter_spec))
