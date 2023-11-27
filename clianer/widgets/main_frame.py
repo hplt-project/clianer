@@ -2,7 +2,6 @@ import asyncio
 import urwid
 
 from opuscleaner.server import get_sample
-from opuscleaner.datasets import list_datasets
 from opuscleaner.server import ParsedFilterOutput, FilterPipelinePatch, \
     api_get_dataset_filters, api_update_dataset_filters
 from opuscleaner.filters import get_global_filter
@@ -174,13 +173,14 @@ class ClianerFrame(urwid.WidgetWrap):
         widget = ErrorDialog(error_msg)
         self.openDialog(widget, "error")
 
-    def selectDatasetDialogClosed(self, widget, dataset_name):
-        if dataset_name is not None:
-            self.open_dataset(dataset_name)
+    def selectDatasetDialogClosed(self, widget, dataset_name_and_langs):
+        if dataset_name_and_langs is not None:
+            dataset_name, langs = dataset_name_and_langs
+            self.open_dataset(dataset_name, langs)
 
-    def importFilterDialogClosed(self, widget, dataset_name):
-        if dataset_name is not None:
-            self.import_filters(dataset_name)
+    def importFilterDialogClosed(self, widget, dataset_name_and_langs):
+        if dataset_name_and_langs is not None:
+            self.import_filters(dataset_name_and_langs[0])
 
     def import_filters(self, dataset_name):
         self.filter_list.set_signal_emit("filter_update", False)
@@ -193,9 +193,10 @@ class ClianerFrame(urwid.WidgetWrap):
 
         self.filter_list.set_signal_emit("filter_update", True)
 
-    def open_dataset(self, name):
+    def open_dataset(self, name, langs):
         # TODO ask to save filters
         self.dataset = None
+        self.langs = langs
         self.filter_list.clear_filters()
         pipeline = api_get_dataset_filters(name)
         for step in pipeline.filters:

@@ -56,4 +56,5 @@ class SelectDatasetDialog(Dialog):
         super().__init__(self.listbox, title, width=70, height=30)
 
     def select_dataset(self, button, dataset):
-        self._emit("close", dataset)
+        self._emit(
+            "close", (dataset, [lang for lang, _ in self.datasets[dataset]]))
