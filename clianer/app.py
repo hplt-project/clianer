@@ -45,7 +45,7 @@ DATA_LOCATION = "/home/helcl/hplt/OpusCleaner/data/train-parts"
 
 FILTERS_ROOT = "/home/helcl/hplt/OpusCleaner/opuscleaner"
 FILTER_PATHS = os.pathsep.join([
-    os.path.join(FILTERS_ROOT, "filters**/*.json"),
+    os.path.join(FILTERS_ROOT, "filters/**/*.json"),
     os.path.join(os.path.dirname(__file__), "filters/**/*.json")
 ])
 
